@@ -175,16 +175,18 @@ namespace TechAssemblyManager.UI
             for (int i = 1; i <= 100; i++)
             {
                 string categorieRandom = categorii[rand.Next(1, categorii.Length)];
-                toateProdusele.Add(new Produs
+                var produs = new Produs
                 {
                     Nume = $"{categorieRandom} {i}",
                     Pret = 100 + rand.Next(0, 5000),
                     Imagine = Properties.Resources.gaming_zmeu_max_amd_ryzen_3_3200g_36ghz_16gb_ddr4_1tb_ssd_amd_radeon_vega_8_iluminare_rgb_5aa76ce87e4c16367530ff2aa7414470,
                     Categorie = categorieRandom
-                });
+                };
+
+                toateProdusele.Add(produs);
+                ratinguri[produs] = rand.Next(1, 6); // Rating aleatoriu între 1 și 5
             }
         }
-
         private void cmbCategorii_SelectedIndexChanged(object sender, EventArgs e)
         {
             paginaCurenta = 1;
@@ -271,10 +273,21 @@ namespace TechAssemblyManager.UI
                 Left = 10
             };
 
-            // Adaugă în coș dacă vrei și funcția asta
             btn.Click += (s, e) =>
             {
+                if (!AppState.EsteLogat)
+                {
+                    MessageBox.Show("Trebuie să fii logat pentru a adăuga produse în coș.", "Autentificare necesară", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    Logare logareForm = new Logare();
+                    logareForm.ShowDialog();
+                    this.Hide();
+                    return;
+                }
                 lstCos.Items.Add($"{produs.Nume} - {produs.Pret} RON");
+
+                if (!cosCumparaturi.Contains(produs))
+                    cosCumparaturi.Add(produs);
+
                 if (cartForm == null || cartForm.IsDisposed)
                 {
                     cartForm = new CartForm(mainForm, this);
@@ -285,14 +298,9 @@ namespace TechAssemblyManager.UI
                     cartForm.Show();
                 }
 
-                // Adu-l în față
                 cartForm.BringToFront();
-
-                // Adaugă produsul în listBox-ul din CartForm
                 cartForm.AdaugaProdusInListBox(produs);
-
             };
-
 
             Label lblRating = new Label
             {
@@ -302,7 +310,6 @@ namespace TechAssemblyManager.UI
                 Width = 60
             };
 
-            // ComboBox pentru stele
             ComboBox cmbRating = new ComboBox
             {
                 Top = 190,
@@ -310,23 +317,32 @@ namespace TechAssemblyManager.UI
                 Width = 80,
                 DropDownStyle = ComboBoxStyle.DropDownList
             };
+
             cmbRating.Items.AddRange(new object[] { "1 ⭐", "2 ⭐⭐", "3 ⭐⭐⭐", "4 ⭐⭐⭐⭐", "5 ⭐⭐⭐⭐⭐" });
-            cmbRating.SelectedIndex = 4; // default 5 stele
+
+            int ratingInitial = ratinguri.ContainsKey(produs) ? ratinguri[produs] : 5;
+            cmbRating.SelectedIndex = ratingInitial - 1;
+
             cmbRating.SelectedIndexChanged += (s, e) =>
             {
+                if (!cosCumparaturi.Contains(produs))
+                {
+                    MessageBox.Show("Poți modifica ratingul doar după ce adaugi produsul în coș.");
+                    cmbRating.SelectedIndex = ratinguri[produs] - 1;
+                    return;
+                }
+
                 int ratingAles = cmbRating.SelectedIndex + 1;
-                if (ratinguri.ContainsKey(produs))
-                    ratinguri[produs] = ratingAles;
-                else
-                    ratinguri.Add(produs, ratingAles);
+                ratinguri[produs] = ratingAles;
             };
+
             p.Controls.Add(pic);
             p.Controls.Add(lblNume);
             p.Controls.Add(lblPret);
             p.Controls.Add(btn);
             p.Controls.Add(lblRating);
             p.Controls.Add(cmbRating);
-            // Adaugă click pentru a deschide EcranInfo
+
             AdaugaClickLaToate(p, (s, e) =>
             {
                 EcranInfo infoForm = new EcranInfo(produs);
@@ -335,6 +351,7 @@ namespace TechAssemblyManager.UI
 
             return p;
         }
+
 
         private void AdaugaClickLaToate(Control control, EventHandler handler)
         {
@@ -401,11 +418,21 @@ namespace TechAssemblyManager.UI
             mainForm.Show();
             this.Close();
         }
-
+        public void AddProdusToCos(Produs produs)
+        {
+            AppState.AdaugaProdus(produs);
+        }
         private void button13_Click(object sender, EventArgs e)
         {
-            CartForm cartForm = new CartForm(mainForm, this);
+            if (cartForm == null)
+            {
+                cartForm = new CartForm(this.mainForm, this);
+            }
+
+            cartForm.SetProduse(AppState.GetProduse());
+
             cartForm.Show();
+            cartForm.BringToFront();
             this.Hide();
 
 
@@ -444,6 +471,11 @@ namespace TechAssemblyManager.UI
 
             paginaCurenta = 1;
             AfiseazaPagina(paginaCurenta, produseCuRating);
+        }
+        public List<Produs> GetProduseSelectate()
+        {
+            // Înlocuiește cu logica reală de selectare dacă ai UI
+            return AppState.GetProduse(); // sau lista locală de produse
         }
     }
 }

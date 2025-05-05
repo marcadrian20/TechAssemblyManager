@@ -30,13 +30,13 @@ namespace TechAssemblyManager.UI
         private void InitializeComponent()
         {
             TechAssemblyManager = new GroupBox();
+            pictureBox1 = new PictureBox();
             CerereService = new Button();
             ViewCatalog = new Button();
             Promotii = new Button();
             cos = new Button();
             Myaccount = new Button();
             Searchbar = new TextBox();
-            pictureBox1 = new PictureBox();
             TechAssemblyManager.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             SuspendLayout();
@@ -57,6 +57,18 @@ namespace TechAssemblyManager.UI
             TechAssemblyManager.TabStop = false;
             TechAssemblyManager.Text = "TechAssemblyManage";
             TechAssemblyManager.Enter += TechAssemblyManager_Enter;
+    
+      // Fix for CS1061: The issue is that `TechAssemblyManager.UI.Properties.Resources.pcgarage` is being accessed incorrectly.  
+            // The `UI` namespace is not part of the `GroupBox` class. Instead, it should be accessed directly from the `Properties.Resources` namespace.  
+            // Correcting the line to properly reference the resource.  
+
+            pictureBox1.Image = Properties.Resources.pcgarage;
+            pictureBox1.Location = new Point(18, 22);
+            pictureBox1.Name = "pictureBox1";
+            pictureBox1.Size = new Size(77, 112);
+            pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
+            pictureBox1.TabIndex = 7;
+            pictureBox1.TabStop = false;
             // 
             // CerereService
             // 
@@ -116,18 +128,6 @@ namespace TechAssemblyManager.UI
             Searchbar.TabIndex = 1;
             Searchbar.Text = "Searchbar";
             Searchbar.TextChanged += Searchbar_TextChanged;
-pictureBox1.Image = Properties.Resources.pcgarage;
-            // Fix for CS1061: The issue is that the `TechAssemblyManager.UI.Properties.Resources.pcgarage` reference is incorrect.  
-            // The `pictureBox1.Image` property should reference the correct namespace and resource path for the image.  
-            // Assuming the image resource is located in the `Properties.Resources` of the project, the fix is as follows:
-
-            pictureBox1.Image = Properties.Resources.pcgarage;
-            pictureBox1.Location = new Point(18, 22);
-            pictureBox1.Name = "pictureBox1";
-            pictureBox1.Size = new Size(77, 112);
-            pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
-            pictureBox1.TabIndex = 7;
-            pictureBox1.TabStop = false;
             // 
             // MainForm
             // 
@@ -137,6 +137,7 @@ pictureBox1.Image = Properties.Resources.pcgarage;
             Controls.Add(TechAssemblyManager);
             Name = "MainForm";
             Text = "MainForm";
+            Load += MainForm_Load;
             TechAssemblyManager.ResumeLayout(false);
             TechAssemblyManager.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();

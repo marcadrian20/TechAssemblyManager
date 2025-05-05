@@ -7,6 +7,12 @@ namespace TechAssemblyManager
     {
         private static List<Produs> produseInCos = new List<Produs>();
 
+        // ➕ Nou: Utilizator logat
+        public static MainForm.User UtilizatorCurent { get; set; }
+
+        // ➕ Nou: Shortcut pentru verificare logare
+        public static bool EsteLogat => UtilizatorCurent != null;
+
         public static void AdaugaProdus(Produs produs)
         {
             produseInCos.Add(produs);
@@ -25,6 +31,7 @@ namespace TechAssemblyManager
         public static void Clear()
         {
             produseInCos.Clear();
+            UtilizatorCurent = null; // Resetare stare utilizator la logout
         }
     }
 }
