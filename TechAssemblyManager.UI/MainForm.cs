@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -11,6 +12,9 @@ namespace TechAssemblyManager.UI
         public CartForm cartForm;
         ProductViewerForm prvf;
         MainForm mainForm;
+        private Label lblComenzi;
+        private ListBox lstComenzi;
+        private Button Login;
         Form f;
         private List<Produs> produseInCos = new List<Produs>();
         public MainForm()
@@ -18,6 +22,21 @@ namespace TechAssemblyManager.UI
             InitializeComponent();
             Instance = this;
             prvf = new ProductViewerForm(this, null);
+            if (Login == null)
+            {
+                Login = new Button()
+                {
+                    Text = "Login",
+                    Size = new Size(75, 23)
+                };
+                Login.Location = new Point
+                    (
+                        cos.Left,
+                        cos.Bottom + 10
+                    );
+                Login.Click += Login_Click;
+            }
+            TechAssemblyManager.Controls.Add(Login);
             Rectangle screen = Screen.PrimaryScreen.WorkingArea;
             int centerX = (screen.Width - TechAssemblyManager.Width) / 2;
             int centerY = (screen.Height - TechAssemblyManager.Height) / 2;
@@ -55,7 +74,15 @@ namespace TechAssemblyManager.UI
         {
             AppState.AdaugaProdus(produs);
         }
+        private void AfiseazaComenzi(User user)
+        {
+            lstComenzi.Items.Clear();
 
+            foreach (var comanda in user.Comenzi)
+            {
+                lstComenzi.Items.Add($"Comanda din {comanda.DataComenzii.ToShortDateString()} - {comanda.Produse.Count} produse");
+            }
+        }
         private void cos_Click(object sender, EventArgs e)
         {
             if (cartForm == null)
@@ -91,5 +118,53 @@ namespace TechAssemblyManager.UI
         }
 
         public MainForm Instance { get; }
+        public class User
+        {
+            public string Nume { get; set; }
+            public string Email { get; set; }
+            public List<Comanda> Comenzi { get; set; }
+            public bool EsteAutentificat { get; private set; }
+            public OrderData DateLivrare { get; set; }
+
+            private string parola;
+
+            public User(string nume, string email)
+            {
+                Nume = nume;
+                Email = email;
+                Comenzi = new List<Comanda>();
+                parola = "admin123"; // poți înlocui cu una mai bună
+                EsteAutentificat = false;
+
+            }
+
+            public bool Autentifica(string parolaIntrodusa)
+            {
+                if (parolaIntrodusa == parola)
+                {
+                    EsteAutentificat = true;
+                    return true;
+                }
+                return false;
+            }
+        }
+
+        private void Login_Click(object sender, EventArgs e)
+        {
+            Logare logare = new Logare();
+            logare.Show();
+            this.Hide();
+        }
+
+        private void MainForm_Load(object sender, EventArgs e)
+        {
+            Login = new Button()
+            {
+                Text = "Login",
+                Location = new Point(10, 10),
+                Size = new Size(75, 23)
+            };
+            Login.Click += Login_Click;
+        }
     }
 }

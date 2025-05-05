@@ -18,7 +18,7 @@ namespace TechAssemblyManager.UI
         private FlowLayoutPanel infoPanel; // Adăugat pentru a reține panoul de informații
 
         public object Instance => this;
-
+        public bool EsteAutentificat { get; set; } = false;
         public OrderInformation(MainForm mainForm)
         {
             InitializeComponent();
@@ -31,13 +31,14 @@ namespace TechAssemblyManager.UI
             this.Controls.Add(panelContainer);
 
             infoPanel = new FlowLayoutPanel();
-            infoPanel.Dock = DockStyle.Fill;
+            infoPanel.AutoSize = true;
+            infoPanel.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            infoPanel.Anchor = AnchorStyles.None;
             infoPanel.FlowDirection = FlowDirection.TopDown;
             infoPanel.WrapContents = false;
             infoPanel.AutoScroll = true;
 
             panelContainer.Controls.Add(infoPanel);
-
             this.Load += OrderInformation_Load;
             this.Resize += OrderInformation_Resize;
         }
@@ -52,73 +53,84 @@ namespace TechAssemblyManager.UI
             panelContainer.Controls.Add(frm);
             panelContainer.Tag = frm;
             frm.Show();
-            panelContainer.BringToFront(); // <- asta te asigură că e în față
+            panelContainer.BringToFront();
         }
         private void AdaugaCampuriInformatii()
         {
-            // Verificăm dacă deja au fost adăugate câmpurile
-            if (infoPanel.Controls.OfType<TextBox>().Any())
+            if (infoPanel.Controls.Count > 0)
                 return;
 
             string[] etichete = { "Nume:", "Adresă:", "Telefon:", "Email:" };
-            int labelWidth = 80;
-            int textBoxWidth = 200;
 
             foreach (string eticheta in etichete)
             {
-                Label lbl = new Label();
-                lbl.Text = eticheta;
-                lbl.Width = labelWidth;
+                var panelRand = new FlowLayoutPanel
+                {
+                    FlowDirection = FlowDirection.LeftToRight,
+                    AutoSize = true,
+                    Margin = new Padding(5)
+                };
 
-                TextBox txt = new TextBox();
-                txt.Name = "txt" + eticheta.Replace(":", "").Replace("ă", "a");
-                txt.Width = textBoxWidth;
+                Label lbl = new Label
+                {
+                    Text = eticheta,
+                    Width = 80,
+                    TextAlign = ContentAlignment.MiddleLeft
+                };
 
-                infoPanel.Controls.Add(lbl);
-                infoPanel.Controls.Add(txt);
+                TextBox txt = new TextBox
+                {
+                    Name = "txt" + eticheta.Replace(":", "").Replace("ă", "a"),
+                    Width = 200
+                };
+
+                panelRand.Controls.Add(lbl);
+                panelRand.Controls.Add(txt);
+                infoPanel.Controls.Add(panelRand);
             }
-
-            Button btnTrimitere = new Button();
-            btnTrimitere.Text = "Trimite Comanda";
-            btnTrimitere.Width = 150;
-            btnTrimitere.Click += Trimitere_Click;
-
-            infoPanel.Controls.Add(btnTrimitere);
         }
 
+        public bool ClickATrimis { get; private set; } = false;
 
-        private void Trimitere_Click(object sender, EventArgs e)
+        public void Trimitere_Click(object sender, EventArgs e)
         {
+            ClickATrimis = true;
             foreach (Control control in infoPanel.Controls)
             {
-                if (control is TextBox txt && string.IsNullOrWhiteSpace(txt.Text))
+                foreach (Control subControl in control.Controls)
                 {
-                    MessageBox.Show("Vă rugăm să completați toate câmpurile înainte de a trimite comanda.",
-                                    "Câmpuri incomplete", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
+                    if (subControl is TextBox txt && string.IsNullOrWhiteSpace(txt.Text))
+                    {
+                        MessageBox.Show("Vă rugăm să completați toate câmpurile înainte de a trimite comanda.",
+                                        "Câmpuri incomplete", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return;
+                    }
                 }
             }
 
-            // Dacă toate câmpurile sunt completate, continuă cu plasarea comenzii
-            Panel panelMesaj = new Panel();
-            panelMesaj.Size = new Size(300, 150);
-            panelMesaj.BackColor = Color.LightGray;
-            panelMesaj.BorderStyle = BorderStyle.FixedSingle;
-            panelMesaj.Location = new Point((this.ClientSize.Width - panelMesaj.Width) / 2,
-                                            (this.ClientSize.Height - panelMesaj.Height) / 2);
-            panelMesaj.BringToFront();
+            Panel panelMesaj = new Panel
+            {
+                Size = new Size(300, 150),
+                BackColor = Color.LightGray,
+                BorderStyle = BorderStyle.FixedSingle,
+                Location = new Point((this.ClientSize.Width - 300) / 2, (this.ClientSize.Height - 150) / 2)
+            };
 
-            Label lblMesaj = new Label();
-            lblMesaj.Text = "COMANDA PLASATĂ";
-            lblMesaj.Font = new Font("Segoe UI", 11, FontStyle.Bold);
-            lblMesaj.TextAlign = ContentAlignment.MiddleCenter;
-            lblMesaj.Dock = DockStyle.Top;
-            lblMesaj.Height = 50;
+            Label lblMesaj = new Label
+            {
+                Text = "COMANDA PLASATĂ",
+                Font = new Font("Segoe UI", 11, FontStyle.Bold),
+                TextAlign = ContentAlignment.MiddleCenter,
+                Dock = DockStyle.Top,
+                Height = 50
+            };
 
-            Button btnIesire = new Button();
-            btnIesire.Text = "IEȘIRE";
-            btnIesire.Size = new Size(100, 30);
-            btnIesire.Location = new Point(30, 80);
+            Button btnIesire = new Button
+            {
+                Text = "IEȘIRE",
+                Size = new Size(100, 30),
+                Location = new Point(30, 80)
+            };
             btnIesire.Click += (s, args) =>
             {
                 CartForm cartForm = new CartForm(_mainForm, productViewerForm);
@@ -126,49 +138,78 @@ namespace TechAssemblyManager.UI
                 this.Hide();
             };
 
-            Button btnContinuare = new Button();
-            btnContinuare.Text = "CONTINUAȚI VIZUALIZARE";
-            btnContinuare.Size = new Size(160, 30);
-            btnContinuare.Location = new Point(140, 80);
+            Button btnContinuare = new Button
+            {
+                Text = "CONTINUAȚI VIZUALIZARE",
+                Size = new Size(160, 30),
+                Location = new Point(140, 80)
+            };
             btnContinuare.Click += (s, args) =>
             {
-                this.Controls.Remove(panelMesaj); 
+                this.Controls.Remove(panelMesaj);
                 MainForm main = new MainForm();
                 main.Show();
                 this.Hide();
-
             };
 
-            // Adaugă în panel
             panelMesaj.Controls.Add(lblMesaj);
             panelMesaj.Controls.Add(btnIesire);
             panelMesaj.Controls.Add(btnContinuare);
 
-            // Adaugă panel-ul în form
             this.Controls.Add(panelMesaj);
             panelMesaj.BringToFront();
         }
 
         private void CenterControls()
         {
-            // Centrare ListBox
-            Introducereinformatii.Left = (this.ClientSize.Width - Introducereinformatii.Width) / 2;
-            Introducereinformatii.Top = (this.ClientSize.Height - Introducereinformatii.Height) / 2 - 40;
+            if (infoPanel.Controls.Count == 0)
+                return;
 
-            // Buton sub ListBox
-            Trimitere.Left = (this.ClientSize.Width - Trimitere.Width) / 2;
-            Trimitere.Top = Introducereinformatii.Bottom + 10;
+            int totalHeight = infoPanel.Controls.Cast<Control>().Sum(c => c.Height + c.Margin.Vertical);
+            int totalWidth = infoPanel.Controls.Cast<Control>().Max(c => c.Width + c.Margin.Horizontal);
+
+            infoPanel.Size = new Size(totalWidth, totalHeight);
+            infoPanel.Left = (this.ClientSize.Width - infoPanel.Width) / 2;
+            infoPanel.Top = (this.ClientSize.Height - infoPanel.Height) / 2;
         }
 
         private void OrderInformation_Load(object sender, EventArgs e)
         {
-            CenterControls();
             AdaugaCampuriInformatii();
+            Trimitere.Enabled = EsteAutentificat;
+            CenterControls();
         }
 
         private void OrderInformation_Resize(object sender, EventArgs e)
         {
             CenterControls();
+        }
+
+        private void Account_Click(object sender, EventArgs e)
+        {
+            AccountForm accountForm = new AccountForm(_mainForm, this);
+            accountForm.ShowDialog();
+            this.Hide();
+        }
+        public OrderData GetOrderData()
+        {
+            var data = new OrderData();
+
+            foreach (Control control in infoPanel.Controls)
+            {
+                foreach (Control subControl in control.Controls)
+                {
+                    if (subControl is TextBox txt)
+                    {
+                        if (txt.Name.Contains("Nume")) data.Nume = txt.Text;
+                        else if (txt.Name.Contains("Adresa")) data.Adresa = txt.Text;
+                        else if (txt.Name.Contains("Telefon")) data.Telefon = txt.Text;
+                        else if (txt.Name.Contains("Email")) data.Email = txt.Text;
+                    }
+                }
+            }
+
+            return data;
         }
     }
 }

@@ -28,19 +28,9 @@
         /// </summary>
         private void InitializeComponent()
         {
-            Introducereinformatii = new ListBox();
             Trimitere = new Button();
+            Account = new Button();
             SuspendLayout();
-            // 
-            // Introducereinformatii
-            // 
-            Introducereinformatii.FormattingEnabled = true;
-            Introducereinformatii.ItemHeight = 15;
-            Introducereinformatii.Location = new Point(162, 43);
-            Introducereinformatii.Name = "Introducereinformatii";
-            Introducereinformatii.Size = new Size(466, 244);
-            Introducereinformatii.TabIndex = 0;
-            Introducereinformatii.TabStop = false;
             // 
             // Trimitere
             // 
@@ -52,25 +42,32 @@
             Trimitere.UseVisualStyleBackColor = true;
             Trimitere.Click += Trimitere_Click;
             // 
+            // Account
+            // 
+            Account.Location = new Point(354, 98);
+            Account.Name = "Account";
+            Account.Size = new Size(75, 23);
+            Account.TabIndex = 2;
+            Account.Text = "Account";
+            Account.UseVisualStyleBackColor = true;
+            Account.Click += Account_Click;
+            // 
             // OrderInformation
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
+            Controls.Add(Account);
             Controls.Add(Trimitere);
-            Controls.Add(Introducereinformatii);
             Name = "OrderInformation";
             Text = "OrderInformation";
             Load += OrderInformation_Load;
+            Resize += OrderInformation_Resize;
             ResumeLayout(false);
-            this.Load += new System.EventHandler(this.OrderInformation_Load);
-            this.Resize += new System.EventHandler(this.OrderInformation_Resize);
         }
 
         #endregion
-
-        private ListBox Introducereinformatii;
         private Button Trimitere;
-
+        private Button Account;
     }
 }
