@@ -11,6 +11,8 @@ namespace TechAssemblyManager.UI
         public string Nume { get; set; }
         public decimal Pret { get; set; }
         public Image Imagine { get; set; }
+        public string Descriere { get; set; }
+        public int ScorCritici { get; set; }
         public string Categorie { get; set; }
         public override string ToString()
         {

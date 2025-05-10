@@ -7,19 +7,26 @@ namespace TechAssemblyManager.UI
     public partial class EcranInfo : Form
     {
         private Produs produs;
-
+        private MainForm mainForm;
         public EcranInfo(Produs produs)
         {
+            mainForm=new MainForm();
             InitializeComponent();
             this.produs = produs;
             this.Text = "Detalii Produs";
             this.Size = new Size(400, 550);
             this.StartPosition = FormStartPosition.CenterScreen;
             this.BackColor = Color.FromArgb(245, 245, 245);
-
+            this.FormClosing += EcranInfo_FormClosing;
             AfiseazaDetalii();
         }
-
+        private void EcranInfo_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if(mainForm!=null && !mainForm.IsDisposed)
+            {
+                mainForm.Show();
+            }
+        }
         private void AfiseazaDetalii()
         {
             Font fontTitlu = new Font("Segoe UI", 14, FontStyle.Bold);

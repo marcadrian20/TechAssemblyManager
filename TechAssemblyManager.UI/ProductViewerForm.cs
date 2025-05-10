@@ -14,7 +14,6 @@ namespace TechAssemblyManager.UI
         private List<Produs> produseFiltrate = new List<Produs>();
         private List<Produs> cosCumparaturi = new List<Produs>();
         private Dictionary<Produs, int> ratinguri = new Dictionary<Produs, int>();
-
         private int produsePePagina = 10;
         private int paginaCurenta = 1;
 
@@ -28,7 +27,7 @@ namespace TechAssemblyManager.UI
         private Button btnAccount;
         private object instance;
 
-        public ProductViewerForm Instance { get; private set; }
+        public ProductViewerForm Instance { get;  set; }
 
         public ProductViewerForm(MainForm mainForm, CartForm cartForm, string categorieInitiala = null)
         {
@@ -55,14 +54,24 @@ namespace TechAssemblyManager.UI
                 cmbCategorii.SelectedIndex = 0;
 
             cmbCategorii.SelectedIndexChanged += cmbCategorii_SelectedIndexChanged;
-
+            this.FormClosing += ProductViewerForm_FormClosing;
             FiltreazaProduse();
             AfiseazaPagina(1);
         }
-
+        private void ProductViewerForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (mainForm != null && !mainForm.IsDisposed)
+            {
+                mainForm.Show();
+            }
+        }
         public ProductViewerForm(object instance)
         {
+            InitializeComponent();
             this.instance = instance;
+
+            // Ensure layout is initialized
+            InitializeLayout();
         }
 
         private void ProductViewerForm_Load(object sender, EventArgs e)
@@ -118,7 +127,20 @@ namespace TechAssemblyManager.UI
                 BackColor = Color.Transparent
             };
             this.Controls.Add(flpProduse);
-
+            Button btnReincarca = new Button
+            {
+                Text = "Reîncarcă Produse",
+                Location = new Point(500, 10), // Adaptează locația butonului
+                Width = 120,
+                BackColor = Color.FromArgb(52, 152, 219),
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat
+            };
+            btnReincarca.Click += (s, e) =>
+            {
+                ReincarcaProduse(); // Apelăm funcția de reîncărcare
+            };
+            this.Controls.Add(btnReincarca);
             flpPaginare = new FlowLayoutPanel
             {
                 Location = new Point(10 + offsetDreapta, 610),
@@ -126,7 +148,6 @@ namespace TechAssemblyManager.UI
                 FlowDirection = FlowDirection.LeftToRight
             };
             this.Controls.Add(flpPaginare);
-
             lblPagina = new Label
             {
                 Location = new Point(580 + offsetDreapta, 655),
@@ -162,7 +183,6 @@ namespace TechAssemblyManager.UI
             this.Load += ProductViewerForm_Load;
         }
 
-
         private void LoadProduse()
         {
             string[] categorii = { "Toate", "Laptopuri", "Desktopuri", "Monitoare", "Procesor", "Placa Video", "Placa de Baza", "RAM", "SSD", "HDD", "Sursa", "Carcasa" };
@@ -196,6 +216,11 @@ namespace TechAssemblyManager.UI
 
         private void FiltreazaProduse()
         {
+            if (txtCautare == null || cmbCategorii == null)
+            {
+                MessageBox.Show("Controls are not initialized yet.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
             string cautare = txtCautare.Text.ToLower();
             string categorieSelectata = cmbCategorii.SelectedItem?.ToString() ?? "Toate";
 
@@ -213,6 +238,10 @@ namespace TechAssemblyManager.UI
 
         private void AfiseazaPagina(int pagina, List<Produs> listaProduse)
         {
+            if (flpProduse == null)
+            {
+                throw new InvalidOperationException("flpProduse is not initialized. Ensure InitializeLayout() is called before using this method.");
+            }
             flpProduse.Controls.Clear();
             int start = (pagina - 1) * produsePePagina;
             int end = Math.Min(start + produsePePagina, listaProduse.Count);
@@ -278,7 +307,7 @@ namespace TechAssemblyManager.UI
                 if (!AppState.EsteLogat)
                 {
                     MessageBox.Show("Trebuie să fii logat pentru a adăuga produse în coș.", "Autentificare necesară", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    Logare logareForm = new Logare();
+                    Logare logareForm = new Logare(mainForm);
                     logareForm.ShowDialog();
                     this.Hide();
                     return;
@@ -408,7 +437,7 @@ namespace TechAssemblyManager.UI
 
         private void Account_Click(object sender, EventArgs e)
         {
-            AccountForm accForm = new AccountForm(mainForm, this);
+            AccountForm accForm = new AccountForm(mainForm, this,this.Instance);
             accForm.ShowDialog();
             this.Hide();
         }
@@ -418,10 +447,26 @@ namespace TechAssemblyManager.UI
             mainForm.Show();
             this.Close();
         }
-        public void AddProdusToCos(Produs produs)
+        public void AdaugaProdus(Produs produs)
         {
-            AppState.AdaugaProdus(produs);
+            if (!toateProdusele.Contains(produs))
+            {
+                toateProdusele.Add(produs); // Adăugăm produsul la lista globală
+            }
+// Adăugăm produsul la coșul de cumpărături
+
+            // Reset filters to ensure the new product is visible
+            cmbCategorii.SelectedItem = "Toate"; // Reset category filter to "Toate"
+            txtCautare.Text = ""; // Clear the search text
+
+            // Refresh the filtered list and UI
+            FiltreazaProduse();
+            AfiseazaPagina(1);
+
+            // Provide feedback to the user
+            MessageBox.Show($"Produsul '{produs.Nume}' a fost adăugat cu succes!", "Produs Adăugat", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
+
         private void button13_Click(object sender, EventArgs e)
         {
             if (cartForm == null)
@@ -471,6 +516,26 @@ namespace TechAssemblyManager.UI
 
             paginaCurenta = 1;
             AfiseazaPagina(paginaCurenta, produseCuRating);
+        }
+        public void ReincarcaProduse()
+        {
+            var produseNoi = AppState.GetProduse(); // Obține produsele noi
+
+            // Adăugăm produsele noi dacă nu sunt deja în lista globală
+            foreach (var produs in produseNoi)
+            {
+                if (!toateProdusele.Any(p => p.Nume == produs.Nume && p.Pret == produs.Pret))
+                {
+                    toateProdusele.Add(produs);
+                }
+            }
+
+            // Resetăm filtrele și afișăm produsele din nou
+            cmbCategorii.SelectedItem = "Toate";
+            txtCautare.Text = "";
+
+            FiltreazaProduse(); // Filtrăm din nou lista de produse
+
         }
         public List<Produs> GetProduseSelectate()
         {

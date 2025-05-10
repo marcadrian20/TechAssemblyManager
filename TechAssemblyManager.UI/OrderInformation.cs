@@ -37,13 +37,19 @@ namespace TechAssemblyManager.UI
             infoPanel.FlowDirection = FlowDirection.TopDown;
             infoPanel.WrapContents = false;
             infoPanel.AutoScroll = true;
-
+            this.FormClosing += OrderInformation_FormClosing;
             panelContainer.Controls.Add(infoPanel);
             this.Load += OrderInformation_Load;
             this.Resize += OrderInformation_Resize;
         }
 
-
+        private void OrderInformation_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (_mainForm!=null && !_mainForm.IsDisposed)
+            {
+                _mainForm.Show();
+            }
+        }
         private void LoadFormInPanel(Form frm)
         {
             panelContainer.Controls.Clear();
@@ -187,7 +193,7 @@ namespace TechAssemblyManager.UI
 
         private void Account_Click(object sender, EventArgs e)
         {
-            AccountForm accountForm = new AccountForm(_mainForm, this);
+            AccountForm accountForm = new AccountForm(_mainForm, this,productViewerForm);
             accountForm.ShowDialog();
             this.Hide();
         }

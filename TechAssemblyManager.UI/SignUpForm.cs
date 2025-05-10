@@ -13,9 +13,10 @@ namespace TechAssemblyManager.UI
         private Label lblNume;
         private Label lblEmail;
         private Label lblParola;
-
-        public SignUpForm()
+        private MainForm mainForm;
+        public SignUpForm(MainForm mainForm)
         {
+            this.mainForm = mainForm;
             this.Text = "Creare cont";
             this.Size = new Size(300, 280);
             this.StartPosition = FormStartPosition.CenterScreen;
@@ -31,7 +32,7 @@ namespace TechAssemblyManager.UI
 
             btnCreeazaCont = new Button() { Text = "Crează cont", Location = new Point(100, 150), Width = 100 };
             btnCreeazaCont.Click += BtnCreeazaCont_Click;
-
+            this.FormClosing += SignUpForm_FormClosing;
             this.Controls.Add(lblNume);
             this.Controls.Add(txtNume);
             this.Controls.Add(lblEmail);
@@ -40,7 +41,13 @@ namespace TechAssemblyManager.UI
             this.Controls.Add(txtParola);
             this.Controls.Add(btnCreeazaCont);
         }
-
+        private void SignUpForm_FormClosing(object sender, EventArgs e)
+        {
+            if(mainForm != null && !mainForm.IsDisposed)
+            {
+                mainForm.Show();
+            }
+        }   
         private void BtnCreeazaCont_Click(object sender, EventArgs e)
         {
             string nume = txtNume.Text;
@@ -58,7 +65,7 @@ namespace TechAssemblyManager.UI
             MessageBox.Show("Cont creat cu succes!");
 
             this.Hide();
-            new Logare().Show();
+            new Logare(mainForm).Show();
         }
     }
 }

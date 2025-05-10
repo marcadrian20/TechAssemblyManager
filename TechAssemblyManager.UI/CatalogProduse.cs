@@ -34,9 +34,16 @@ namespace TechAssemblyManager.UI
                 FlowDirection = FlowDirection.TopDown,
                 WrapContents = false
             };
+            this.FormClosing += CatalogProduse_FormClosing; // Adaugă evenimentul de închidere
             this.Controls.Add(pcComponentsSidebar);
         }
-
+        private void CatalogProduse_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (m != null && !m.IsDisposed)
+            {
+                m.Show();
+            }
+        }
         private void InitPcComponentsSidebar()
         {
             string[] componente = { "Procesor", "Placa Video", "Placa de Baza", "RAM", "SSD", "HDD", "Sursa", "Carcasa" };
@@ -254,7 +261,7 @@ namespace TechAssemblyManager.UI
 
         private void Myaccount_Click(object sender, EventArgs e)
         {
-            AccountForm accForm = new AccountForm(m, this);
+            AccountForm accForm = new AccountForm(m, this,prvf);
             accForm.ShowDialog();
             this.Hide();
         }

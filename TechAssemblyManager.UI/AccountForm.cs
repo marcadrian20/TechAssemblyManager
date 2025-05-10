@@ -7,6 +7,7 @@ namespace TechAssemblyManager.UI
 {
     public partial class AccountForm : Form
     {
+        private Label lblUser;
         private Form f;
         private ListBox b;
         private CartForm cartForm;
@@ -15,17 +16,21 @@ namespace TechAssemblyManager.UI
         public Label lblPassword;
         private Button btnAutentificare;
         private Label lblComenzi;
-        private MainForm.User utilizator = new MainForm.User("Guest", "guest@email.com");
+        // Pentru testare:
+        private MainForm.User utilizator;
+
 
         public MainForm Instance { get; }
 
         // Constructor cu parametrul Form f
-        public AccountForm(MainForm mainForm, Form f)
+        public AccountForm(MainForm mainForm, Form f, ProductViewerForm productViewerForm)
         {
             InitializeComponent();
             this.f = f;
+            _productViewerForm = productViewerForm;
             _mainForm = mainForm;
-
+            Instance = mainForm.Instance??mainForm;
+            utilizator = AppState.UtilizatorCurent;
             // Inițializează lblPassword și adaugă-l la formular
             lblPassword = new Label();
             lblPassword.Name = "lblPassword";
@@ -54,13 +59,27 @@ namespace TechAssemblyManager.UI
                 Height = 100
             };
             this.Controls.Add(b);
+            lblUser = new Label
+            {
+                Name = "lblUser",
+                AutoSize = true
+            };
+            this.Controls.Add(lblUser);
             // Centrează controalele
             CenterControls();
+            this.FormClosing += AccountForm_FormClosing;
 
             // Atașăm un eveniment de redimensionare pentru formular
             this.Resize += AccountForm_Resize;
         }
-
+        private void AccountForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            // Afișează MainForm când AccountForm este închis
+            if (_mainForm != null && !_mainForm.IsDisposed)
+            {
+                _mainForm.Show();
+            }
+        }
         public AccountForm(MainForm instance)
         {
             Instance = instance;
@@ -84,73 +103,255 @@ namespace TechAssemblyManager.UI
 
         private void AccountForm_Load(object sender, EventArgs e)
         {
+            utilizator = AppState.UtilizatorCurent;
+
+            if (utilizator != null && utilizator.EsteAutentificat)
+            {
+                string tipCont = "Client";
+                if (utilizator is AngajatSenior)
+                {
+                    tipCont = "Angajat Senior";
+                }
+                else if (utilizator is AngajatJunior)
+                {
+                    tipCont = "Angajat Junior";
+                }
+                else if (utilizator is Manager)
+                {
+                    tipCont = "Manager";
+                }
+                else 
+                {
+                    tipCont = "Angajat";
+                }
+
+                lblUser.Text = $"Utilizator: {utilizator.Nume} ({tipCont})";
+            }
+            else
+            {
+                lblUser.Text = "Utilizator: Guest";
+            }
+            lblPassword.Click += new EventHandler(lblPassword_Click);
             lblUser.Text = "Utilizator: Guest";
 
             // Atașăm un eveniment de click pe label pentru a seta parola
             lblPassword.Click += new EventHandler(lblPassword_Click);
-
-            // Centrează controalele
             CenterControls();
         }
         private void BtnAutentificare_Click(object sender, EventArgs e)
         {
-            string parola = lblPassword.Text.StartsWith("Parola: ") ? lblPassword.Text.Substring(8).Trim() : "";
+            string parola = GetParolaDinLabel();
+
+            if (!ValidareParola(parola))
+                return;
+
+            if (!UserManager.Autentifica(utilizator.Email, parola))
+            {
+                MessageBox.Show("Parolă incorectă!");
+                return;
+            }
+
+            // Obține utilizatorul corect din UserManager
+            var utilizatorCorect = UserManager.GetUserByEmail(utilizator.Email);
+            if (utilizatorCorect == null)
+            {
+                MessageBox.Show("Eroare la autentificare. Utilizatorul nu a fost găsit.");
+                return;
+            }
+
+            utilizatorCorect.EsteAutentificat = true;
+            AppState.UtilizatorCurent = utilizatorCorect;
+
+            AfiseazaDetaliiUtilizator(utilizatorCorect);
+            AdaugaControaleSpecifice(utilizatorCorect);
+
+            MessageBox.Show("Autentificare reușită!");
+            CenterControls();
+        }
+        private string GetParolaDinLabel()
+        {
+            return lblPassword.Text.StartsWith("Parola: ") ? lblPassword.Text.Substring(8).Trim() : "";
+        }
+
+        private bool ValidareParola(string parola)
+        {
             if (string.IsNullOrEmpty(parola) || parola == "*****")
             {
                 MessageBox.Show("Introduceți parola înainte de autentificare!");
+                return false;
+            }
+            return true;
+        }
+
+        private void AfiseazaDetaliiUtilizator(MainForm.User user)
+        {
+            string tipCont = GetTipCont(user);
+            lblUser.Text = $"Utilizator: {user.Nume} ({tipCont})";
+        }
+
+        private void AdaugaControaleSpecifice(MainForm.User user)
+        {
+            if (_mainForm == null || Instance == null)
+            {
+                MessageBox.Show("MainForm or Instance is not initialized.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
-            OrderData orderData = new OrderData();
-            if (utilizator.Autentifica(parola))
+            if (user is AngajatSenior)
             {
-                MessageBox.Show("Autentificare reușită!");
-                if (utilizator.DateLivrare == null)
+                Button btnAdaugaProdus = new Button
                 {
-                    var orderInfo = new OrderInformation(_mainForm);
-                    orderInfo.EsteAutentificat = true;
-                    orderInfo.ShowDialog();
+                    Text = "Adaugă produs nou",
+                    Width = 150
+                };
+                btnAdaugaProdus.Click += (s, ev) => {
+                    var form = new AdaugaProdusForm(_productViewerForm, _mainForm);
+                    form.FormClosed += (se, ea) => _mainForm.Show(); // <- revine la MainForm
+                    form.Show();
+                };
 
-                    // 🔒 Verifică dacă a apăsat butonul "Trimitere"
-                    if (!orderInfo.ClickATrimis)
+                this.Controls.Add(btnAdaugaProdus);
+                Button btnComenzi = new Button
+                {
+                    Text = "Vezi comenzi de onorat",
+                    Width = 180
+                };
+                btnComenzi.Click += (s, ev) => {
                     {
-                        MessageBox.Show("Comanda nu a fost trimisă.");
-                        return;
+                        var form = new OnorareComenziForm(user, this.Instance);
+                        form.FormClosed += (se, ea) => _mainForm.Show(); // <- revine la MainForm
+                        form.Show();
                     }
+                    ;
+                };
+                this.Controls.Add(btnComenzi);
 
-                    orderData = orderInfo.GetOrderData();
-                    if (string.IsNullOrWhiteSpace(orderData.Nume) ||
-                        string.IsNullOrWhiteSpace(orderData.Adresa) ||
-                        string.IsNullOrWhiteSpace(orderData.Telefon) ||
-                        string.IsNullOrWhiteSpace(orderData.Email))
+                Button btnService = new Button
+                {
+                    Text = "Vezi cereri service",
+                    Width = 180
+                };
+                btnService.Click += (s, ev) => {
                     {
-                        MessageBox.Show("Comanda nu a fost completată.");
-                        return;
+                        var form = new VizualizareCereriForm(user, this.Instance);
+                        form.FormClosed += (se, ea) => _mainForm.Show(); // <- revine la MainForm
+                        form.Show();
                     }
-                    utilizator.DateLivrare = orderData;
-                }
-                if (cartForm == null)
-                    cartForm = new CartForm(_mainForm);
-                cartForm.SetProduse(AppState.GetProduse());
-                List<Produs> produse = cartForm.GetProduse();
-
-                if (produse.Count == 0)
-                {
-                    MessageBox.Show("Nu există produse selectate pentru comandă.");
-                    return;
-                }
-
-                var comanda = new Comanda(produse, orderData.Nume, orderData.Adresa, orderData.Telefon, orderData.Email);
-                utilizator.Comenzi.Add(comanda);
-
-                b.Items.Add($"Comanda din {comanda.DataComenzii.ToShortDateString()} - {comanda.Produse.Count} produse");
-                foreach (var produs in comanda.Produse)
-                {
-                    b.Items.Add($"Produs: {produs.Nume}, Preț: {produs.Pret} RON");
-                }
-
-                lblComenzi.Text = "Comanda a fost plasată cu succes!";
-                CenterControls();
+                    ;
+                };
+                this.Controls.Add(btnService);
             }
+            if (user is AngajatJunior)
+            {
+                Button btnComenzi = new Button
+                {
+                    Text = "Vezi comenzi de onorat",
+                    Width = 180
+                };
+                btnComenzi.Click += (s, ev) => {
+                    var form=new OnorareComenziForm(user, this.Instance);
+                     form.FormClosed += (se, ea) => _mainForm.Show(); // <- revine la MainForm
+                    form.Show();
+                };
+                this.Controls.Add(btnComenzi);
+
+                Button btnService = new Button
+                {
+                    Text = "Vezi cereri service",
+                    Width = 180
+                };
+                btnService.Click += (s, ev) => {
+                    var form = new VizualizareCereriForm(user,_mainForm);
+                    form.ShowDialog();
+                };
+                this.Controls.Add(btnService);
+            }
+
+            if (user is Manager)
+            {
+                Button btnPromo = new Button
+                {
+                    Text = "Gestionează promoții",
+                    Width = 150
+                };
+                btnPromo.Click += (s, ev) => new GestioneazaPromotiiForm(_mainForm).ShowDialog();
+                this.Controls.Add(btnPromo);
+                Button btnGestionareAngajati = new Button
+                {
+                    Text = "Gestionare Angajați",
+                    Width = 180
+                };
+                btnGestionareAngajati.Click += (s, ev) =>new ManagerForm().ShowDialog();
+                this.Controls.Add(btnGestionareAngajati);
+            }
+        }
+
+        private bool AsiguraDateLivrare(MainForm.User user, out OrderData orderData)
+        {
+            orderData = user.DateLivrare;
+            if (orderData != null)
+                return true;
+
+            var orderInfo = new OrderInformation(_mainForm)
+            {
+                EsteAutentificat = true
+            };
+            orderInfo.ShowDialog();
+
+            if (!orderInfo.ClickATrimis)
+            {
+                MessageBox.Show("Comanda nu a fost trimisă.");
+                return false;
+            }
+
+            orderData = orderInfo.GetOrderData();
+
+            if (string.IsNullOrWhiteSpace(orderData.Nume) ||
+                string.IsNullOrWhiteSpace(orderData.Adresa) ||
+                string.IsNullOrWhiteSpace(orderData.Telefon) ||
+                string.IsNullOrWhiteSpace(orderData.Email))
+            {
+                MessageBox.Show("Comanda nu a fost completată.");
+                return false;
+            }
+
+            user.DateLivrare = orderData;
+            return true;
+        }
+
+        private bool PlaseazaComanda(MainForm.User user, OrderData orderData)
+        {
+            if (cartForm == null)
+                cartForm = new CartForm(_mainForm);
+
+            cartForm.SetProduse(AppState.GetProduse());
+            List<Produs> produse = cartForm.GetProduse();
+
+            if (produse.Count == 0)
+            {
+                MessageBox.Show("Nu există produse selectate pentru comandă.");
+                return false;
+            }
+
+            var comanda = new Comanda(produse, orderData.Nume, orderData.Adresa, orderData.Telefon, orderData.Email);
+            user.Comenzi.Add(comanda);
+
+            b.Items.Add($"Comanda din {comanda.DataComenzii.ToShortDateString()} - {comanda.Produse.Count} produse");
+            foreach (var produs in comanda.Produse)
+            {
+                b.Items.Add($"Produs: {produs.Nume}, Preț: {produs.Pret} RON");
+            }
+
+            lblComenzi.Text = "Comanda a fost plasată cu succes!";
+            return true;
+        }
+
+        private string GetTipCont(MainForm.User utilizator)
+        {
+            if (utilizator is AngajatSenior) return "Angajat Senior";
+            if (utilizator is AngajatJunior) return "Angajat Junior";
+            if (utilizator is Manager) return "Manager";
+            if (utilizator is Angajat) return "Angajat";
+            return "Client";  // Default pentru client
         }
         private void lblPassword_Click(object sender, EventArgs e)
         {
