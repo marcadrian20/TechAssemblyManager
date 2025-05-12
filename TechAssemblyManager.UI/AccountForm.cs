@@ -144,13 +144,11 @@ namespace TechAssemblyManager.UI
 
             if (!ValidareParola(parola))
                 return;
-
             if (!UserManager.Autentifica(utilizator.Email, parola))
             {
                 MessageBox.Show("Parolă incorectă!");
                 return;
             }
-
             // Obține utilizatorul corect din UserManager
             var utilizatorCorect = UserManager.GetUserByEmail(utilizator.Email);
             if (utilizatorCorect == null)
@@ -158,7 +156,28 @@ namespace TechAssemblyManager.UI
                 MessageBox.Show("Eroare la autentificare. Utilizatorul nu a fost găsit.");
                 return;
             }
-
+            if (AsiguraDateLivrare(utilizator, out OrderData orderData))
+            {
+                var comenzi = AppState.GetProduse();
+                b.Items.Add($"Date livrare: {orderData.Nume}, {orderData.Adresa}, {orderData.Telefon}, {orderData.Email}");
+                if (cartForm == null)
+                {
+                    cartForm = new CartForm(_mainForm, _productViewerForm);
+                }
+                cartForm.SetProduse(AppState.GetProduse());
+                if (cartForm != null)
+                {
+                    List<Produs> produse = cartForm.GetProduse();
+                    foreach (var produs in produse)
+                    {
+                        b.Items.Add($"Produs: {produs.Nume}, Preț: {produs.Pret}");
+                    }
+                }
+            }
+            else
+            {
+                MessageBox.Show("trebuie completaTE datele de livrare");
+            }
             utilizatorCorect.EsteAutentificat = true;
             AppState.UtilizatorCurent = utilizatorCorect;
 
@@ -285,7 +304,7 @@ namespace TechAssemblyManager.UI
             }
         }
 
-        private bool AsiguraDateLivrare(MainForm.User user, out OrderData orderData)
+        public bool AsiguraDateLivrare(MainForm.User user, out OrderData orderData)
         {
             orderData = user.DateLivrare;
             if (orderData != null)
@@ -345,7 +364,7 @@ namespace TechAssemblyManager.UI
             return true;
         }
 
-        private string GetTipCont(MainForm.User utilizator)
+        private  string GetTipCont(MainForm.User utilizator)
         {
             if (utilizator is AngajatSenior) return "Angajat Senior";
             if (utilizator is AngajatJunior) return "Angajat Junior";

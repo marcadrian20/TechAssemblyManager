@@ -11,6 +11,7 @@ namespace TechAssemblyManager.UI
         private ComboBox cmbStatusNou;
         private Label lblStatusNou;
         private MainForm mainForm;
+        private ProductViewerForm productViewerForm;
         public OnorareComenziForm(MainForm.User user,MainForm mainForm)
         {
             if (mainForm == null || mainForm.Instance == null)
@@ -18,6 +19,7 @@ namespace TechAssemblyManager.UI
                 throw new ArgumentNullException(nameof(mainForm), "MainForm or its Instance cannot be null.");
             }
             this.mainForm = mainForm.Instance;
+            this.productViewerForm = new ProductViewerForm(this);
             this.Text = "Onorare Comenzi";
             this.Size = new System.Drawing.Size(500, 400);
             this.StartPosition = FormStartPosition.CenterScreen;
@@ -46,9 +48,7 @@ namespace TechAssemblyManager.UI
         }
         private void IncarcaComenzi()
         {
-            // Exemplu static – aici ar trebui să încarci comenzile reale
-            lstComenzi.Items.Add("Comanda #123 – Client: Popescu – Status: În așteptare");
-            lstComenzi.Items.Add("Comanda #124 – Client: Ionescu – Status: În curs");
+            var comenzi = AppState.GetProduse();
         }
 
         private void BtnModificaStatus_Click(object sender, EventArgs e)
@@ -66,6 +66,7 @@ namespace TechAssemblyManager.UI
                 return;
             }
 
+            IncarcaComenzi();
             // Aici actualizezi statusul în obiectul real
             MessageBox.Show("Status actualizat la: " + statusNou);
         }

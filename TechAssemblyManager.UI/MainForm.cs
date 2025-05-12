@@ -117,7 +117,7 @@ namespace TechAssemblyManager.UI
             this.Hide();
         }
 
-        private void AcceseazaProduseDinCos()
+        public void AcceseazaProduseDinCos()
         {
             if (cartForm != null)
             {

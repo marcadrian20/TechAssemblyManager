@@ -90,10 +90,9 @@ namespace TechAssemblyManager.UI
                 MessageBox.Show("Prețul trebuie să fie un număr valid.");
                 return;
             }
-
             if (_productViewerForm == null)
             {
-                MessageBox.Show("Product Viewer Form is not available.");
+                _productViewerForm=new ProductViewerForm(this);
                 return;
             }
 

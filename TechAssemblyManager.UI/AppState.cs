@@ -96,7 +96,6 @@ namespace TechAssemblyManager
             comanda.Status = "Onorată";
             Console.WriteLine($"✔️ Comanda pentru {comanda.Nume} ({comanda.Email}) a fost onorată de {this.Nume}.");
         }
-
         public override void ActualizeazaStatusService(CerereService cerere, string statusNou)
         {
             if (cerere == null)

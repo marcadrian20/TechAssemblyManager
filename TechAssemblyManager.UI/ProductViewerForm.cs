@@ -27,14 +27,14 @@ namespace TechAssemblyManager.UI
         private Button btnAccount;
         private object instance;
 
-        public ProductViewerForm Instance { get;  set; }
+        public  ProductViewerForm Instance { get;  set; }
 
         public ProductViewerForm(MainForm mainForm, CartForm cartForm, string categorieInitiala = null)
         {
             InitializeComponent();
             this.mainForm = mainForm;
             this.cartForm = cartForm;
-
+            Instance = this;
             this.Text = "Catalog Produse";
             this.Size = new Size(1000, 700);
             this.BackColor = Color.FromArgb(245, 245, 245);

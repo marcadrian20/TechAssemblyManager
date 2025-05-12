@@ -14,19 +14,24 @@ namespace TechAssemblyManager.UI
         private Button btnCreeaza, btnSterge;
         private ListBox lstPromotii;
         private MainForm mainForm;
+        private CartForm cartForm;
         public GestioneazaPromotiiForm(MainForm mainForm)
         {
+
             this.mainForm = mainForm;
+            this.cartForm = mainForm.cartForm;
             this.Text = "Gestionare Promoții";
             this.Size = new System.Drawing.Size(700, 500);
 
             Label lblProduse = new Label { Text = "Produse disponibile:", Top = 20, Left = 20 };
             lstProduse = new ListBox { Top = 40, Left = 20, Width = 250, Height = 200 };
-            Produs p = new Produs { Categorie = "Laptop", Descriere = "Laptop de gaming", Imagine =, Nume = "Laptop Asus", Pret = 5000, ScorCritici = 5 };
+            Produs p = new Produs { Categorie = "Unitate1", Descriere = "Unitate performanta", Imagine =Properties.Resources.Imagine4, Nume = "Unitate1", Pret = 5000, ScorCritici = 5 };
             AppState.AdaugaProdus(p);
-            Produs p1 = new Produs { Categorie = "Imprimanta", Descriere = "performanta", Imagine =, Nume = "Imprimanta", Pret = 2000, ScorCritici = 4 };
+            Produs p1 = new Produs { Categorie = "Unitate2", Descriere = "Unitate2 performanta", Imagine =Properties.Resources.Imagine3, Nume = "Unitate2", Pret = 2000, ScorCritici = 4 };
+            AppState.AdaugaProdus(p1);
             lstProduse.Items.AddRange(AppState.GetProduse().ToArray());
-
+            AppState.AdaugaProdus(p=new Produs { Categorie = "promotie", Descriere = "Unitate performanta", Imagine = Properties.Resources.Imagine4, Nume = "Unitate1", Pret = 500, ScorCritici = 5 });
+            AppState.AdaugaProdus(p1=new Produs { Categorie = "promotie", Descriere = "Unitate2 performanta", Imagine = Properties.Resources.Imagine3, Nume = "Unitate2", Pret = 200, ScorCritici = 4 });
             Label lblSelectate = new Label { Text = "Produse promoție:", Top = 20, Left = 280 };
             lstProduseSelectate = new ListBox { Top = 40, Left = 280, Width = 250, Height = 200 };
 

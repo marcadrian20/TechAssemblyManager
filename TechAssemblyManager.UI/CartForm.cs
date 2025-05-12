@@ -28,6 +28,12 @@ namespace TechAssemblyManager.UI
             this.Load += CartForm_Load;
             this.Resize += CartForm_Load;
         }
+
+        public CartForm(AccountForm accountForm)
+        {
+            AccountForm = accountForm;
+        }
+
         private void CartForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (mainForm != null && !mainForm.IsDisposed)
@@ -38,6 +44,7 @@ namespace TechAssemblyManager.UI
         public object Instance { get; private set; }
         public object CosCumparaturi { get; internal set; }
         public object getInstance { get; internal set; }
+        public AccountForm AccountForm { get; }
 
         private void CartForm_Load(object sender, EventArgs e)
         {
