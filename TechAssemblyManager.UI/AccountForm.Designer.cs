@@ -2,25 +2,13 @@
 {
     partial class AccountForm
     {
-        private Label lblUser;
         private Button btnLogout;
 
         private void InitializeComponent()
         {
-            lblUser = new Label();
             btnLogout = new Button();
             back = new Button();
             SuspendLayout();
-            // 
-            // lblUser
-            // 
-            lblUser.AutoSize = true;
-            lblUser.Font = new Font("Segoe UI", 10F);
-            lblUser.Location = new Point(20, 20);
-            lblUser.Name = "lblUser";
-            lblUser.Size = new Size(107, 19);
-            lblUser.TabIndex = 0;
-            lblUser.Text = "Utilizator: Guest";
             // 
             // btnLogout
             // 
@@ -45,13 +33,11 @@
             // 
             ClientSize = new Size(250, 120);
             Controls.Add(back);
-            Controls.Add(lblUser);
             Controls.Add(btnLogout);
             Name = "AccountForm";
             Text = "Contul Meu";
             Load += AccountForm_Load;
             ResumeLayout(false);
-            PerformLayout();
         }
         private Button back;
     }

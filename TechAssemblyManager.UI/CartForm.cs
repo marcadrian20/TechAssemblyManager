@@ -24,14 +24,27 @@ namespace TechAssemblyManager.UI
             InitializeComponent();
             this.productViewerForm = productViewerForm;
             this.mainForm = mainForm;
-
+            this.FormClosing += CartForm_FormClosing;
             this.Load += CartForm_Load;
             this.Resize += CartForm_Load;
         }
 
+        public CartForm(AccountForm accountForm)
+        {
+            AccountForm = accountForm;
+        }
+
+        private void CartForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (mainForm != null && !mainForm.IsDisposed)
+            {
+                mainForm.Show();
+            }
+        }
         public object Instance { get; private set; }
         public object CosCumparaturi { get; internal set; }
         public object getInstance { get; internal set; }
+        public AccountForm AccountForm { get; }
 
         private void CartForm_Load(object sender, EventArgs e)
         {
@@ -46,7 +59,6 @@ namespace TechAssemblyManager.UI
             backbutton.Font = modernFont;
             Cosdecumparaturi.Font = modernFont;
             Myaccount.Font = modernFont;
-            cos.Font = modernFont;
             PlasareComanda.Font = modernFont;
             Total.Font = new Font("Segoe UI", 10, FontStyle.Regular);
             listBox1.Font = new Font("Segoe UI", 10, FontStyle.Regular);
@@ -54,7 +66,7 @@ namespace TechAssemblyManager.UI
             // Margini rotunjite și culori
             Color accentColor = Color.FromArgb(0, 120, 215); // Albastru Windows
 
-            Button[] buttons = { backbutton, Cosdecumparaturi, Myaccount, cos, PlasareComanda };
+            Button[] buttons = { backbutton,  Myaccount, PlasareComanda };
             foreach (Button btn in buttons)
             {
                 btn.FlatStyle = FlatStyle.Flat;
@@ -77,14 +89,8 @@ namespace TechAssemblyManager.UI
             // Poziționare
             backbutton.Left = margin;
             backbutton.Top = margin;
-
-            Cosdecumparaturi.Top = margin;
-            Cosdecumparaturi.Left = (formWidth - Cosdecumparaturi.Width) / 2;
-
             Myaccount.Top = margin;
-            cos.Top = margin;
             Myaccount.Left = formWidth - Myaccount.Width - margin;
-            cos.Left = Myaccount.Left - cos.Width - margin;
 
             int verticalCenter = formHeight / 2;
             int listBoxTop = verticalCenter - listBox1.Height - Total.Height - PlasareComanda.Height;
@@ -163,7 +169,7 @@ namespace TechAssemblyManager.UI
         }
         private void Myaccount_Click(object sender, EventArgs e)
         {
-            AccountForm accForm = new AccountForm(mainForm, this);
+            AccountForm accForm = new AccountForm(mainForm, this,productViewerForm);
             accForm.ShowDialog();
             this.Hide();
         }

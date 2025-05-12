@@ -14,6 +14,7 @@ namespace TechAssemblyManager.UI
         public string Telefon { get; set; }
         public string Email { get; set; }
         public DateTime DataComenzii { get; set; }
+        public string Status { get; internal set; }
 
         public Comanda(List<Produs> produse, string nume, string adresa, string telefon, string email)
         {

@@ -15,6 +15,7 @@ namespace TechAssemblyManager.UI
         private Label lblComenzi;
         private ListBox lstComenzi;
         private Button Login;
+        private Button btnIstoricService;
         Form f;
         private List<Produs> produseInCos = new List<Produs>();
         public MainForm()
@@ -37,16 +38,29 @@ namespace TechAssemblyManager.UI
                 Login.Click += Login_Click;
             }
             TechAssemblyManager.Controls.Add(Login);
+            btnIstoricService = new Button()
+            {
+                Text = "Istoric Service",
+                Size = new Size(120, 30)
+            };
+            btnIstoricService.Location = new Point
+                (
+                    Login.Left,
+                    Login.Bottom + 10
+                );
+            btnIstoricService.Click += BtnIstoricService_Click;
+            TechAssemblyManager.Controls.Add(btnIstoricService);
             Rectangle screen = Screen.PrimaryScreen.WorkingArea;
             int centerX = (screen.Width - TechAssemblyManager.Width) / 2;
             int centerY = (screen.Height - TechAssemblyManager.Height) / 2;
             TechAssemblyManager.Location = new Point(centerX, centerY);
             Instance = this;
-        }
 
-        public MainForm(MainForm instance)
+        }
+        public MainForm(MainForm instance = null)
         {
-            Instance = instance;
+            Instance = instance ?? this; // Ensure Instance is never null
+            InitializeComponent();
         }
 
         private void ViewCatalog_Click(object sender, EventArgs e)
@@ -58,16 +72,22 @@ namespace TechAssemblyManager.UI
 
         private void Promotii_Click(object sender, EventArgs e)
         {
-            promotiiForm = new PromotiiForm();
+            promotiiForm = new PromotiiForm(this.Instance);
             promotiiForm.Show();
             this.Hide();
         }
-
+        private void BtnIstoricService_Click(object sender, EventArgs e)
+        {
+            VizualizareCereriForm vizualizareCereriForm = new VizualizareCereriForm(AppState.UtilizatorCurent, this); // Transmite instanța curentă
+            vizualizareCereriForm.Show();
+            this.Hide();
+        }
         private void Myaccount_Click(object sender, EventArgs e)
         {
-            AccountForm accountForm1 = new AccountForm(this, this);
-            accountForm1.Show();
-            this.Hide();
+            var productViewerForm = new ProductViewerForm(this, cartForm); // Pass the current MainForm and CartForm
+            var accountForm = new AccountForm(this, this, productViewerForm); // Pass MainForm, current form, and ProductViewerForm
+            accountForm.Show();
+            this.Hide(); //
         }
 
         public void AddProdusToCos(Produs produs)
@@ -97,7 +117,7 @@ namespace TechAssemblyManager.UI
             this.Hide();
         }
 
-        private void AcceseazaProduseDinCos()
+        public void AcceseazaProduseDinCos()
         {
             if (cartForm != null)
             {
@@ -113,7 +133,7 @@ namespace TechAssemblyManager.UI
         private void TechAssemblyManager_Enter(object sender, EventArgs e) { }
         private void CerereService_Click(object sender, EventArgs e)
         {
-            CerereServiceForm cerereForm = new CerereServiceForm();
+            CerereServiceForm cerereForm = new CerereServiceForm(this.Instance);
             cerereForm.ShowDialog();
         }
 
@@ -123,7 +143,7 @@ namespace TechAssemblyManager.UI
             public string Nume { get; set; }
             public string Email { get; set; }
             public List<Comanda> Comenzi { get; set; }
-            public bool EsteAutentificat { get; private set; }
+            public bool EsteAutentificat { get;  set; }
             public OrderData DateLivrare { get; set; }
 
             private string parola;
@@ -133,7 +153,7 @@ namespace TechAssemblyManager.UI
                 Nume = nume;
                 Email = email;
                 Comenzi = new List<Comanda>();
-                parola = "admin123"; // poți înlocui cu una mai bună
+                parola = "admin123"; 
                 EsteAutentificat = false;
 
             }
@@ -151,7 +171,7 @@ namespace TechAssemblyManager.UI
 
         private void Login_Click(object sender, EventArgs e)
         {
-            Logare logare = new Logare();
+            Logare logare = new Logare(this.Instance);
             logare.Show();
             this.Hide();
         }

@@ -12,18 +12,26 @@ namespace TechAssemblyManager.UI
 {
     public partial class SidebarForm: Form
     {
-        public SidebarForm()
+        private MainForm mainForm;
+        public SidebarForm(MainForm mainForm)
         {
+            this.mainForm = mainForm;
             this.FormBorderStyle = FormBorderStyle.None;
             this.StartPosition = FormStartPosition.Manual;
             this.Size = new Size(200, Screen.PrimaryScreen.WorkingArea.Height);
             this.Location = new Point(0, 0);
             this.BackColor = Color.FromArgb(45, 45, 48);
             this.TopMost = true;
-
+            this.FormClosing += SidebarForm_FormClosing;
             InitializeSidebarButtons();
         }
-
+        private void SidebarForm_FormClosing(object sender, EventArgs e)
+        {
+           if(mainForm != null && !mainForm.IsDisposed)
+            {
+                mainForm.Show();
+            }
+        }
         private void InitializeSidebarButtons()
         {
             var btnDashboard = CreateSidebarButton("Dashboard", (s, e) =>

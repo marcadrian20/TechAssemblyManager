@@ -12,9 +12,10 @@ namespace TechAssemblyManager.UI
         private Button btnSignUp;
         private Label lblEmail;
         private Label lblParola;
-
-        public Logare()
+        private MainForm mainForm;
+        public Logare(MainForm mainForm)
         {
+            this.mainForm = mainForm;
             this.Text = "Autentificare";
             this.Size = new Size(300, 250);
             this.StartPosition = FormStartPosition.CenterScreen;
@@ -30,7 +31,7 @@ namespace TechAssemblyManager.UI
 
             btnSignIn.Click += BtnSignIn_Click;
             btnSignUp.Click += BtnSignUp_Click;
-
+            this.FormClosing += LogareForm_FormClosing;
             this.Controls.Add(lblEmail);
             this.Controls.Add(txtEmail);
             this.Controls.Add(lblParola);
@@ -38,7 +39,13 @@ namespace TechAssemblyManager.UI
             this.Controls.Add(btnSignIn);
             this.Controls.Add(btnSignUp);
         }
-
+        private void LogareForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+           if(mainForm != null && !mainForm.IsDisposed)
+            {
+                mainForm.Show();
+            }
+        }
         private void BtnSignIn_Click(object sender, EventArgs e)
         {
             string email = txtEmail.Text;
@@ -54,8 +61,8 @@ namespace TechAssemblyManager.UI
             MainForm.User user = UserManager.GetUserByEmail(email);
             if (user != null && user.Autentifica(parola))
             {
+                AppState.UtilizatorCurent = user; // Stocare corectă
                 MessageBox.Show("Autentificat cu succes!");
-                AppState.UtilizatorCurent = user;
                 this.Hide();
                 new MainForm().Show();
             }
@@ -65,10 +72,11 @@ namespace TechAssemblyManager.UI
             }
         }
 
+
         private void BtnSignUp_Click(object sender, EventArgs e)
         {
             this.Hide();
-            new SignUpForm().Show();
+            new SignUpForm(mainForm).Show();
         }
     }
 }

@@ -14,15 +14,23 @@ namespace TechAssemblyManager.UI
     {
         private List<Produs> cos;
         private object cosCumparaturi;
-
-        public CheckoutForm(List<Produs> cosCumparaturi)
+        private MainForm mainForm;
+        public CheckoutForm(List<Produs> cosCumparaturi,MainForm mainForm)
         {
+            this.mainForm = mainForm;
             InitializeComponent();
             cos = cosCumparaturi;
+            this.FormClosing += CheckoutForm_FormClosing;
             AfiseazaProduse();
             AfiseazaTotal();
         }
-
+        private void CheckoutForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if(mainForm!=null && !mainForm.IsDisposed)
+            {
+                mainForm.Show();
+            }
+        }
         public CheckoutForm(object cosCumparaturi)
         {
             this.cosCumparaturi = cosCumparaturi;
