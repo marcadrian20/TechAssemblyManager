@@ -17,7 +17,7 @@ namespace TechAssemblyManager.Models
         
         public DateTime ScheduledDate { get; set; }
         
-        public ServiceStatus Status { get; set; } = ServiceStatus.Requested;
+        //public ServiceStatus Status { get; set; } = ServiceStatus.Requested;
         
         [Column(TypeName = "decimal(18,2)")]
         public decimal ServiceFee { get; set; }
@@ -29,8 +29,8 @@ namespace TechAssemblyManager.Models
         
         public int? EmployeeId { get; set; }
         
-        [ForeignKey("CustomerId")]
-        public virtual Customer Customer { get; set; }
+        //[ForeignKey("CustomerId")]
+        //public virtual Customer Customer { get; set; }
         
         [ForeignKey("EmployeeId")]
         public virtual Employee HandledBy { get; set; }

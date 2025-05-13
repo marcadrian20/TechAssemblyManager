@@ -21,6 +21,7 @@ namespace TechAssemblyManager.UI
         public MainForm()
         {
             InitializeComponent();
+            this.KeyPreview = true;
             Instance = this;
             prvf = new ProductViewerForm(this, null);
             if (Login == null)
@@ -61,6 +62,15 @@ namespace TechAssemblyManager.UI
         {
             Instance = instance ?? this; // Ensure Instance is never null
             InitializeComponent();
+        }
+
+        private void MainForm_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Control && e.KeyCode == Keys.D)
+            {
+                var debugForm = new DebugWindowForm();
+                debugForm.Show();
+            }
         }
 
         private void ViewCatalog_Click(object sender, EventArgs e)
@@ -178,6 +188,8 @@ namespace TechAssemblyManager.UI
 
         private void MainForm_Load(object sender, EventArgs e)
         {
+            this.KeyDown += MainForm_KeyDown;
+
             Login = new Button()
             {
                 Text = "Login",

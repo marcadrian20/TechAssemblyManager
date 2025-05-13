@@ -30,6 +30,6 @@ namespace TechAssemblyManager.Models
         public virtual ProductCategory Category { get; set; }
         
         public virtual ICollection<OrderItem> OrderItems { get; set; }
-        public virtual ICollection<PromotionItem> PromotionItems { get; set; }
+        //public virtual ICollection<PromotionItem> PromotionItems { get; set; }
     }
 }
