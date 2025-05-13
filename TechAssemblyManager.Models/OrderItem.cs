@@ -19,7 +19,7 @@ namespace TechAssemblyManager.Models
         public virtual Product Product { get; set; }
 
         [ForeignKey("PromotionId")]
-        public virtual Promotion Promotion { get; set; }
+        //public virtual Promotion Promotion { get; set; }
 
         [Required]
         public int Quantity { get; set; }

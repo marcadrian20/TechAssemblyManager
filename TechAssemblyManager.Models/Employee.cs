@@ -13,7 +13,7 @@ namespace TechAssemblyManager.Models
         public virtual ICollection<Order> HandledOrders { get; set; }
         public virtual ICollection<ServiceRequest> HandledServiceRequests { get; set; }
 
-        public virtual ICollection<Promotion> CreatedPromotions { get; set; }
+        //public virtual ICollection<Promotion> CreatedPromotions { get; set; }
         public virtual ICollection<Product> CreatedProducts { get; set; }
     }
 }
