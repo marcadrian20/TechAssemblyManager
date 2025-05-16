@@ -27,7 +27,7 @@ namespace TechAssemblyManager.UI
         private Button btnAccount;
         private object instance;
 
-        public  ProductViewerForm Instance { get;  set; }
+        public ProductViewerForm Instance { get; set; }
 
         public ProductViewerForm(MainForm mainForm, CartForm cartForm, string categorieInitiala = null)
         {
@@ -185,7 +185,7 @@ namespace TechAssemblyManager.UI
 
         private void LoadProduse()
         {
-            string[] categorii = { "Toate", "Laptopuri", "Desktopuri", "Monitoare", "Procesor", "Placa Video", "Placa de Baza", "RAM", "SSD", "HDD", "Sursa", "Carcasa" };
+            string[] categorii = { "Toate", "Laptopuri", "Desktopuri", "Monitoare", "Procesor", "Placa Video", "Placa de Baza", "RAM", "SSD", "HDD", "Sursa", "Carcasa", "Imprimante", "Mouse", "Tastatura" };
             cmbCategorii.Items.Clear();
             cmbCategorii.Items.AddRange(categorii);
             cmbCategorii.SelectedIndex = 0;
@@ -205,6 +205,35 @@ namespace TechAssemblyManager.UI
 
                 toateProdusele.Add(produs);
                 ratinguri[produs] = rand.Next(1, 6); // Rating aleatoriu între 1 și 5
+            }
+            var produseNoi = new List<Produs>
+            {
+                  new Produs
+                  {
+                     Nume = "Imprimantă HP LaserJet M110we",
+                       Pret = 499,
+                         Imagine = ,
+                          Categorie = "Imprimante"
+                   },
+                     new Produs
+                     {
+                         Nume = "Mouse Logitech G502",
+                           Pret = 249,
+                         Imagine =Properties.Resources.,
+                             Categorie = "Mouse"
+                     },
+                       new Produs
+                      {
+                                Nume = "Tastatură Redragon K552",
+                                Pret = 199,
+                                Imagine = ,
+                                 Categorie = "Tastatura"
+                      }
+             };
+            foreach (var produs in produseNoi)
+            {
+                toateProdusele.Add(produs);
+                ratinguri[produs] = rand.Next(1, 6);
             }
         }
         private void cmbCategorii_SelectedIndexChanged(object sender, EventArgs e)
@@ -437,7 +466,7 @@ namespace TechAssemblyManager.UI
 
         private void Account_Click(object sender, EventArgs e)
         {
-            AccountForm accForm = new AccountForm(mainForm, this,this.Instance);
+            AccountForm accForm = new AccountForm(mainForm, this, this.Instance);
             accForm.ShowDialog();
             this.Hide();
         }
@@ -453,7 +482,7 @@ namespace TechAssemblyManager.UI
             {
                 toateProdusele.Add(produs); // Adăugăm produsul la lista globală
             }
-// Adăugăm produsul la coșul de cumpărături
+            // Adăugăm produsul la coșul de cumpărături
 
             // Reset filters to ensure the new product is visible
             cmbCategorii.SelectedItem = "Toate"; // Reset category filter to "Toate"

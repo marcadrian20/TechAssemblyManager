@@ -16,7 +16,7 @@ namespace TechAssemblyManager.UI
         private MainForm _mainForm;
         private ProductViewerForm productViewerForm;
         private FlowLayoutPanel infoPanel; // Adăugat pentru a reține panoul de informații
-
+        private AccountForm _accountForm;
         public object Instance => this;
         public bool EsteAutentificat { get; set; } = false;
         public OrderInformation(MainForm mainForm)
@@ -24,7 +24,6 @@ namespace TechAssemblyManager.UI
             InitializeComponent();
             this.Text = "OrderInformation.cs";
             _mainForm = mainForm;
-
             panelContainer = new Panel();
             panelContainer.Dock = DockStyle.Fill;
             panelContainer.BackColor = Color.White;
@@ -42,7 +41,6 @@ namespace TechAssemblyManager.UI
             this.Load += OrderInformation_Load;
             this.Resize += OrderInformation_Resize;
         }
-
         private void OrderInformation_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (_mainForm!=null && !_mainForm.IsDisposed)
@@ -109,6 +107,7 @@ namespace TechAssemblyManager.UI
                     {
                         MessageBox.Show("Vă rugăm să completați toate câmpurile înainte de a trimite comanda.",
                                         "Câmpuri incomplete", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+
                         return;
                     }
                 }
@@ -214,7 +213,6 @@ namespace TechAssemblyManager.UI
                     }
                 }
             }
-
             return data;
         }
     }

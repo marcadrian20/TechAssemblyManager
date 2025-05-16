@@ -117,29 +117,4 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="Imagine1" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Imagine1.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Imagine3" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Imagine3.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="gaming-zmeu-max-amd-ryzen-3-3200g-36ghz-16gb-ddr4-1tb-ssd-amd-radeon-vega-8-iluminare-rgb-5aa76ce87e4c16367530ff2aa7414470" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\gaming-zmeu-max-amd-ryzen-3-3200g-36ghz-16gb-ddr4-1tb-ssd-amd-radeon-vega-8-iluminare-rgb-5aa76ce87e4c16367530ff2aa74144701.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Imagine2" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Imagine2.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Imagine4" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Imagine4.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="pcgarage" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\pcgarage.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="mouse" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\mouse.jpg;System.Drawing.Bitmap, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="tastatura" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\tastatura.jpg;System.Drawing.Bitmap, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
 </root>
