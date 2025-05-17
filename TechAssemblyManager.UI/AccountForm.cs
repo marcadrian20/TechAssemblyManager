@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace TechAssemblyManager.UI
 {
@@ -18,10 +19,7 @@ namespace TechAssemblyManager.UI
         private Label lblComenzi;
         // Pentru testare:
         private MainForm.User utilizator;
-
-
         public MainForm Instance { get; }
-
         // Constructor cu parametrul Form f
         public AccountForm(MainForm mainForm, Form f, ProductViewerForm productViewerForm)
         {
@@ -332,12 +330,21 @@ namespace TechAssemblyManager.UI
                 MessageBox.Show("Comanda nu a fost completată.");
                 return false;
             }
-
+                var comanda = new Comanda
+                {
+                    Nume = orderData.Nume,
+                    Adresa = orderData.Adresa,
+                    Telefon = orderData.Telefon,
+                    Email = orderData.Email,
+                    DataComenzii = DateTime.Now,
+                    Produse = AppState.GetProduse()
+                };
+                AppState.AdaugaComanda(comanda);
             user.DateLivrare = orderData;
             return true;
         }
 
-        private bool PlaseazaComanda(MainForm.User user, OrderData orderData)
+        public bool PlaseazaComanda(MainForm.User user, OrderData orderData)
         {
             if (cartForm == null)
                 cartForm = new CartForm(_mainForm);
@@ -352,6 +359,7 @@ namespace TechAssemblyManager.UI
             }
 
             var comanda = new Comanda(produse, orderData.Nume, orderData.Adresa, orderData.Telefon, orderData.Email);
+            AppState.AdaugaComanda(comanda);
             user.Comenzi.Add(comanda);
 
             b.Items.Add($"Comanda din {comanda.DataComenzii.ToShortDateString()} - {comanda.Produse.Count} produse");
@@ -441,6 +449,11 @@ namespace TechAssemblyManager.UI
         {
             // Centrează din nou controalele la redimensionarea formularului
             CenterControls();
+        }
+        public List<Comanda> GetComenziUtilizator()
+        {
+            var utilizator = AppState.UtilizatorCurent;
+            return utilizator?.Comenzi ?? new List<Comanda>();
         }
 
         private void back_Click(object sender, EventArgs e)

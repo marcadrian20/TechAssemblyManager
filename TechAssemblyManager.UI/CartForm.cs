@@ -11,6 +11,9 @@ namespace TechAssemblyManager.UI
         private MainForm mainForm;
         private MainForm mainForm1;
         private MainForm mainForm2;
+        private OnorareComenziForm onorareComenziForm;
+        private ProductViewerForm prvf;
+
         public CartForm(MainForm mainForm)
         {
             InitializeComponent();
@@ -32,6 +35,12 @@ namespace TechAssemblyManager.UI
         public CartForm(AccountForm accountForm)
         {
             AccountForm = accountForm;
+        }
+
+        public CartForm(OnorareComenziForm onorareComenziForm, ProductViewerForm prvf)
+        {
+            this.onorareComenziForm = onorareComenziForm;
+            this.prvf = prvf;
         }
 
         private void CartForm_FormClosing(object sender, FormClosingEventArgs e)

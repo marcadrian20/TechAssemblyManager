@@ -12,6 +12,9 @@ namespace TechAssemblyManager
             new AngajatConcret("Ion Popescu", "ion.popescu@example.com"),
             new AngajatConcret("Maria Ionescu", "maria.ionescu@example.com")
         };
+        private static List<Comanda> comenzi = new List<Comanda>();
+        public static void AdaugaComanda(Comanda comanda) => comenzi.Add(comanda);
+        public static List<Comanda> GetComenzi() => new List<Comanda>(comenzi);
 
         public static void AdaugaPromotie(Promotie promotie) => _promotii.Add(promotie);
         public static void StergePromotie(Promotie promotie) => _promotii.Remove(promotie);
