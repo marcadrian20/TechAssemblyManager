@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using FirebaseWrapper;
 using TechAssemblyManager.DAL.FirebaseHelper;
+using TechAssemblyManager.Models;
 
 namespace TechAssemblyManager.UI
 {
@@ -41,7 +42,7 @@ namespace TechAssemblyManager.UI
                 lblStatus.Text = "There was a problem at Sign Up!";
                 return;
             }
-            var user = new FirebaseWrapper.User
+            var user = new TechAssemblyManager.Models.User
             {
                 createdAt = DateTime.UtcNow.ToString("o"),
                 email = emailTextBox.Text,
@@ -369,7 +370,7 @@ namespace TechAssemblyManager.UI
                 MessageBox.Show("Invalid discount format.");
                 return;
             }
-            var promotion = new FirebaseWrapper.Promotion
+            var promotion = new TechAssemblyManager.Models.Promotion
             {
                 promotionId = promotionIdTextBox.Text.Trim(),
                 isActive = promotionIsActiveCheckBox.Checked,

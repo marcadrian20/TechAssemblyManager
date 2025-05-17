@@ -1,35 +1,18 @@
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
-namespace TechAssemblyManager.Models
+﻿namespace TechAssemblyManager.Models
 {
     public class Product
     {
-        [Key]
-        public int ProductId { get; set; }
-        
-        [Required]
-        [StringLength(100)]
-        public string Name { get; set; }
-        
-        [Required]
-        public decimal Price { get; set; }
-        
-        [Required]
-        [StringLength(1000)]
-        public string Description { get; set; }
-        
-        [Range(1, 5)]
-        public int Rating { get; set; }
-        
-        [Required]
-        public int CategoryId { get; set; }
-        
-        [ForeignKey("CategoryId")]
-        public virtual ProductCategory Category { get; set; }
-        
-        public virtual ICollection<OrderItem> OrderItems { get; set; }
-        //public virtual ICollection<PromotionItem> PromotionItems { get; set; }
+        public string productId { get; set; }            // unique ID
+        public string name { get; set; }                 // e.g., "Dell XPS 15"
+        public string description { get; set; }          // detailed description
+        public float price { get; set; }                // product price
+        public string categoryId { get; set; }           // foreign key to ProductCategory
+        public double rating { get; set; }               // criticScore, e.g., 4.5
+        public bool isActive { get; set; }               // if shown in catalog or not
+        public string imageURL { get; set; }
+        public bool hasPromotion { get; set; }
+        public string promotionId {  get; set; }
+
+        public Product() { }
     }
 }
