@@ -11,7 +11,9 @@ namespace TechAssemblyManager.UI
         private ComboBox cmbStatusNou;
         private Label lblStatusNou;
         private MainForm mainForm;
-        private ProductViewerForm productViewerForm;
+        public CartForm cartForm;
+        private ProductViewerForm prvf;
+        private AccountForm accountForm;
         public OnorareComenziForm(MainForm.User user,MainForm mainForm)
         {
             if (mainForm == null || mainForm.Instance == null)
@@ -19,7 +21,8 @@ namespace TechAssemblyManager.UI
                 throw new ArgumentNullException(nameof(mainForm), "MainForm or its Instance cannot be null.");
             }
             this.mainForm = mainForm.Instance;
-            this.productViewerForm = new ProductViewerForm(this);
+            this.accountForm = accountForm;
+            this.prvf = new ProductViewerForm(this);
             this.Text = "Onorare Comenzi";
             this.Size = new System.Drawing.Size(500, 400);
             this.StartPosition = FormStartPosition.CenterScreen;
@@ -31,7 +34,6 @@ namespace TechAssemblyManager.UI
 
             btnModificaStatus = new Button() { Text = "Actualizează Status", Top = 300, Left = 20, Width = 200 };
             btnModificaStatus.Click += BtnModificaStatus_Click;
-
             this.Controls.Add(lstComenzi);
             this.Controls.Add(lblStatusNou);
             this.Controls.Add(cmbStatusNou);
@@ -48,7 +50,19 @@ namespace TechAssemblyManager.UI
         }
         private void IncarcaComenzi()
         {
-            var comenzi = AppState.GetProduse();
+            if (cartForm == null)
+            {
+                cartForm = new CartForm(mainForm,prvf);
+            }
+            cartForm.SetProduse(AppState.GetProduse());
+            if (cartForm != null)
+            {
+                List<Produs> produse = cartForm.GetProduse();
+                foreach (var produs in produse)
+                {
+                    lstComenzi.Items.Add($"Produs: {produs.Nume}, Preț: {produs.Pret}");
+                }
+            }
         }
 
         private void BtnModificaStatus_Click(object sender, EventArgs e)
@@ -65,7 +79,6 @@ namespace TechAssemblyManager.UI
                 MessageBox.Show("Selectează un status nou.");
                 return;
             }
-
             IncarcaComenzi();
             // Aici actualizezi statusul în obiectul real
             MessageBox.Show("Status actualizat la: " + statusNou);
