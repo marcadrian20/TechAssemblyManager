@@ -8,14 +8,18 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using FirebaseWrapper;
+using TechAssemblyManager.BLL;
 using TechAssemblyManager.DAL.FirebaseHelper;
 using TechAssemblyManager.Models;
+
+
 
 namespace TechAssemblyManager.UI
 {
     public partial class DebugWindowForm : Form
     {
         private FirebaseHelper firebaseHelper;
+        private ProductManagerBLL productManagerBLL;
         public DebugWindowForm()
         {
             InitializeComponent();
@@ -28,7 +32,7 @@ namespace TechAssemblyManager.UI
                 "ky7wJX7Iu46hjBHWqDJNWjJW19NeYQurX4Z9VeUv",
                 "AIzaSyBxq3J01JqE6yonLc9plkzA6c3-Gi1r1eU"
             );
-
+            productManagerBLL = new ProductManagerBLL(firebaseHelper);
             if (firebaseHelper._status)
                 lblStatus.Text = "Connected";
             else lblStatus.Text = "Disconnected";
@@ -134,7 +138,11 @@ namespace TechAssemblyManager.UI
                 MessageBox.Show("Invalid price format.");
                 return;
             }
-
+            //
+            //#TODO maybe make the currentUser a private variable within the class?
+            //
+            var currentUser = SessionManager.LoggedInUser;
+            
             var product = new Product
             {
                 productId = productIdTextBox.Text.Trim(),
@@ -148,7 +156,7 @@ namespace TechAssemblyManager.UI
                 categoryId = productCategoryIDTextBox.Text.Trim()
             };
 
-            bool success = await firebaseHelper.AddProductAsync(product);
+            bool success = await productManagerBLL.AddProductAsync(product, currentUser);
             lblStatus.Text = success ? "Product added." : "Failed to add product.";
         }
 
@@ -388,10 +396,10 @@ namespace TechAssemblyManager.UI
 
         private void mainTabControl_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if(mainTabControl.SelectedTab == mainTabControl.TabPages["tabPage4"])
+            if (mainTabControl.SelectedTab == mainTabControl.TabPages["tabPage4"])
             {
                 lblStatus.Text = "Reset Catalog Tab.";
-                comboBoxSort_SelectedIndexChanged(sender,e);
+                comboBoxSort_SelectedIndexChanged(sender, e);
             }
         }
     }
