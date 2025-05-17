@@ -1,32 +1,12 @@
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-
-namespace TechAssemblyManager.Models
+﻿namespace TechAssemblyManager.Models
 {
     public class ProductCategory
     {
-        [Key]
-        public int CategoryId { get; set; }
+        public string categoryId { get; set; }           // unique ID, can be used as key in Firebase
+        public string name { get; set; }                 // e.g., "Laptops"
+        public string type { get; set; }                 // e.g., "system", "component", etc.
+        public string description { get; set; }          // optional category description
 
-        [Required]
-        public CategoryType Type { get; set; }
-
-        [Required]
-        [StringLength(50)]
-        public string Name { get; set; }
-
-        [StringLength(200)]
-        public string Description { get; set; }
-
-        public virtual ICollection<Product> Products { get; set; }
+        public ProductCategory() { }
     }
-}
-
-public enum CategoryType
-{
-    DesktopPC,
-    LaptopPC,
-    Printer,
-    Peripheral,
-    Component
 }

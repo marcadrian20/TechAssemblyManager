@@ -1,4 +1,4 @@
-﻿namespace FirebaseWrapper
+﻿namespace TechAssemblyManager.Models
 {
     public class EmployeeData
     {
