@@ -1,46 +1,16 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace TechAssemblyManager.Models
+﻿namespace TechAssemblyManager.Models
 {
-    public abstract class User
+    public class User
     {
-        [Key]
-        public int UserId { get; set; }
-        
-        ///USER CREDITENTIALS
-        [Required]
-        [StringLength(50)]
-        public string Username { get; set; }
-        
-        [Required]
-        [EmailAddress]
-        public string EmailAddress { get; set; }
-
-        [Required]
-        public string PasswordHash { get; set; }
-
-
-        ///USER ROLES
-        public string Discriminator { get; set; }
-        //public UserType userType { get; set; }
-
-        ///USER INFO
-        [Required]
-        public DateTime CreatedDate { get; set; }=DateTime.Now;
-
-        [Required]
-        [StringLength(50)]
-        public string FirstName { get; set; }
-
-        [Required]
-        [StringLength(50)]
-        public string LastName { get; set; }
+        public string createdAt { get; set; }
+        public CustomerData customerData { get; set; } = new CustomerData();
+        public string email { get; set; }
+        public EmployeeData employeeData { get; set; } = new EmployeeData();
+        public string firstName { get; set; }
+        public string lastName { get; set; }
+        public string passwordHash { get; set; }
+        public string userName { get; set; }
+        public string userType { get; set; }
+        public Dictionary<string, SelectedProduct> selectedProducts { get; set; }
     }
-
-    //public enum UserType
-    //{
-    //    CLIENT,
-    //    MANAGER,
-    //    EMPLOYEE,
-    //}
 }
