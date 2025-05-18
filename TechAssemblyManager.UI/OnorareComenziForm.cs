@@ -27,7 +27,7 @@ namespace TechAssemblyManager.UI
             this.Size = new System.Drawing.Size(500, 400);
             this.StartPosition = FormStartPosition.CenterScreen;
 
-            lstComenzi = new ListBox() { Width = 450, Height = 200, Top = 20, Left = 20 };
+            lstComenzi = new ListBox() { Width = 450, Height = 200, Top = 20, Left = 30 };
             lblStatusNou = new Label() { Text = "Status nou:", Top = 240, Left = 20 };
             cmbStatusNou = new ComboBox() { Top = 260, Left = 20, Width = 200 };
             cmbStatusNou.Items.AddRange(new string[] { "În așteptare", "În curs", "Finalizată" });
@@ -62,7 +62,16 @@ namespace TechAssemblyManager.UI
                 {
                     lstComenzi.Items.Add($"Produs: {produs.Nume}, Preț: {produs.Pret}");
                 }
+                var comenzi=AppState.GetComenzi();
+                foreach (var comanda in comenzi)
+                {
+                    lstComenzi.Items.Add($"Comanda: {comanda.Nume}, Email: {comanda.Email}, Adresa: {comanda.Adresa}, " +
+                        $"Telefon: {comanda.Telefon}," +
+                        $" Status: {comanda.Status="in asteptare"}, Data: {comanda.DataComenzii.ToShortDateString()},Produse:{AppState.GetProduse}");
+
+                }
             }
+
         }
 
         private void BtnModificaStatus_Click(object sender, EventArgs e)
@@ -74,14 +83,32 @@ namespace TechAssemblyManager.UI
             }
 
             string statusNou = cmbStatusNou.SelectedItem as string;
+            lstComenzi.Items.Add($"Statusul comenzii a fost actualizat la: {statusNou}");
             if (string.IsNullOrEmpty(statusNou))
             {
                 MessageBox.Show("Selectează un status nou.");
                 return;
             }
-            IncarcaComenzi();
-            // Aici actualizezi statusul în obiectul real
-            MessageBox.Show("Status actualizat la: " + statusNou);
+            if (cartForm == null)
+            {
+                cartForm = new CartForm(mainForm, prvf);
+            }
+            cartForm.SetProduse(AppState.GetProduse());
+            if (cartForm != null)
+            {
+                List<Produs> produse = cartForm.GetProduse();
+                var comenzi = AppState.GetComenzi();
+                foreach (var comanda in comenzi)
+                {
+                    lstComenzi.Items.Add($"Comanda: {comanda.Nume}, Email: {comanda.Email}, Adresa: {comanda.Adresa}, " +
+                        $"Telefon: {comanda.Telefon}," +
+                        $" Status: {comanda.Status = statusNou}, Data: {comanda.DataComenzii.ToShortDateString()},Produse:{AppState.GetProduse}");
+
+                }
+
+            }
+                // Aici actualizezi statusul în obiectul real
+                MessageBox.Show("Status actualizat la: " + statusNou);
         }
     }
 }

@@ -57,12 +57,9 @@ namespace TechAssemblyManager.UI
             TechAssemblyManager.TabStop = false;
             TechAssemblyManager.Text = "TechAssemblyManage";
             TechAssemblyManager.Enter += TechAssemblyManager_Enter;
-    
-      // Fix for CS1061: The issue is that `TechAssemblyManager.UI.Properties.Resources.pcgarage` is being accessed incorrectly.  
-            // The `UI` namespace is not part of the `GroupBox` class. Instead, it should be accessed directly from the `Properties.Resources` namespace.  
-            // Correcting the line to properly reference the resource.  
-
-            pictureBox1.Image = Properties.Resources.pcgarage;
+            // 
+            // pictureBox1
+            // 
             pictureBox1.Location = new Point(18, 22);
             pictureBox1.Name = "pictureBox1";
             pictureBox1.Size = new Size(77, 112);

@@ -74,16 +74,6 @@ namespace TechAssemblyManager.UI.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap Imagine1 {
-            get {
-                object obj = ResourceManager.GetObject("Imagine1", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap Imagine2 {
             get {
                 object obj = ResourceManager.GetObject("Imagine2", resourceCulture);
@@ -112,12 +102,42 @@ namespace TechAssemblyManager.UI.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] imprimanta {
+            get {
+                object obj = ResourceManager.GetObject("imprimanta", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] mouse {
+            get {
+                object obj = ResourceManager.GetObject("mouse", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap pcgarage {
             get {
                 object obj = ResourceManager.GetObject("pcgarage", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] tastatura {
+            get {
+                object obj = ResourceManager.GetObject("tastatura", resourceCulture);
+                return ((byte[])(obj));
             }
         }
     }

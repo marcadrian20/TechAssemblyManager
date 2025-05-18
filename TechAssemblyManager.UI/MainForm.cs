@@ -38,6 +38,7 @@ namespace TechAssemblyManager.UI
                     );
                 Login.Click += Login_Click;
             }
+            pictureBox1.Image = (Image)Properties.Resources.pcgarage.Clone();
             TechAssemblyManager.Controls.Add(Login);
             btnIstoricService = new Button()
             {

@@ -53,7 +53,9 @@ namespace TechAssemblyManager.UI
             else
                 cmbCategorii.SelectedIndex = 0;
 
+#pragma warning disable CS8622 // Nullability of reference types in type of parameter doesn't match the target delegate (possibly because of nullability attributes).
             cmbCategorii.SelectedIndexChanged += cmbCategorii_SelectedIndexChanged;
+#pragma warning restore CS8622 // Nullability of reference types in type of parameter doesn't match the target delegate (possibly because of nullability attributes).
             this.FormClosing += ProductViewerForm_FormClosing;
             FiltreazaProduse();
             AfiseazaPagina(1);
@@ -202,36 +204,46 @@ namespace TechAssemblyManager.UI
                     Imagine = Properties.Resources.gaming_zmeu_max_amd_ryzen_3_3200g_36ghz_16gb_ddr4_1tb_ssd_amd_radeon_vega_8_iluminare_rgb_5aa76ce87e4c16367530ff2aa7414470,
                     Categorie = categorieRandom
                 };
-
+               
                 toateProdusele.Add(produs);
-                ratinguri[produs] = rand.Next(1, 6); // Rating aleatoriu între 1 și 5
+                ratinguri[produs] = rand.Next(1, 6); 
             }
-            var produseNoi = new List<Produs>
+            for (int i = 1; i <= 20; i++)
             {
-                  new Produs
-                  {
-                     Nume = "Imprimantă HP LaserJet M110we",
-                       Pret = 499,
-                         Imagine = ,
-                          Categorie = "Imprimante"
-                   },
-                     new Produs
-                     {
-                         Nume = "Mouse Logitech G502",
-                           Pret = 249,
-                         Imagine =Properties.Resources.,
-                             Categorie = "Mouse"
-                     },
-                       new Produs
-                      {
-                                Nume = "Tastatură Redragon K552",
-                                Pret = 199,
-                                Imagine = ,
-                                 Categorie = "Tastatura"
-                      }
-             };
-            foreach (var produs in produseNoi)
+                var produs = new Produs
+                {
+                    Nume = $"Imprimantă HP LaserJet M110we {i}",
+                    Pret = 499,
+                    Imagine = (Image)Image.FromStream(new MemoryStream(Properties.Resources.mouse)).Clone(),
+
+                    Categorie = "Imprimante"
+                };
+                toateProdusele.Add(produs);
+                ratinguri[produs] = rand.Next(1, 6);
+            }
+
+            for (int i = 1; i <= 20; i++)
             {
+                var produs = new Produs
+                {
+                    Nume = $"Mouse Logitech G502 {i}",
+                    Pret = 249,
+                    Imagine = (Image)Image.FromStream(new MemoryStream(Properties.Resources.imprimanta)).Clone(),
+                    Categorie = "Mouse"
+                };
+                toateProdusele.Add(produs);
+                ratinguri[produs] = rand.Next(1, 6);
+            }
+
+            for (int i = 1; i <= 20; i++)
+            {
+                var produs = new Produs
+                {
+                    Nume = $"Tastatură Redragon K552 {i}",
+                    Pret = 199,
+                    Imagine = (Image)Image.FromStream(new MemoryStream(Properties.Resources.tastatura)).Clone(),
+                    Categorie = "Tastatura"
+                };
                 toateProdusele.Add(produs);
                 ratinguri[produs] = rand.Next(1, 6);
             }

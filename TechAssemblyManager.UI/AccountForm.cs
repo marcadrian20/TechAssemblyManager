@@ -2,7 +2,6 @@
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace TechAssemblyManager.UI
 {
@@ -330,6 +329,8 @@ namespace TechAssemblyManager.UI
                 MessageBox.Show("Comanda nu a fost completată.");
                 return false;
             }
+            if (orderInfo.ClickATrimis)
+            {
                 var comanda = new Comanda
                 {
                     Nume = orderData.Nume,
@@ -340,6 +341,7 @@ namespace TechAssemblyManager.UI
                     Produse = AppState.GetProduse()
                 };
                 AppState.AdaugaComanda(comanda);
+            }
             user.DateLivrare = orderData;
             return true;
         }

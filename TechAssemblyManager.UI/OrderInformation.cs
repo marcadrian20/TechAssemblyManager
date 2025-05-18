@@ -112,7 +112,6 @@ namespace TechAssemblyManager.UI
                     }
                 }
             }
-
             Panel panelMesaj = new Panel
             {
                 Size = new Size(300, 150),
