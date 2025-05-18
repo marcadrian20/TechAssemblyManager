@@ -21,7 +21,7 @@ namespace TechAssemblyManager.BLL
         {
             if (string.IsNullOrWhiteSpace(product.productId) ||  ///Validation whether there's a valid category
                 currentUser == null //||                          //Or whether there is ab existing user 
-                //currentUser.userType != "employee"              //being an employee
+                                    //currentUser.userType != "employee"              //being an employee
                 )
             { return false; }
             //#TODO @Omixii add validation for Seniors
@@ -42,37 +42,52 @@ namespace TechAssemblyManager.BLL
             var allProducts = await _firebaseHelper.GetAllActiveProductsAsync();
             return allProducts.FindAll(p => p.categoryId == categoryId);
         }
-        //#TODO migrate the sort system for the products to be more robust:
-       //#Example:
-        // public async Task<List<Product>> GetProductsOrderedBy(string categoryId, string selectedFilter)
-        // {
-        //     var products = await GetProductsByCategoryAsync(categoryId);
-        //     switch (selectedFilter)
-        //     {
-        //         case "Category [A -> Z]":
-        //             products = products.OrderBy(p => p.categoryId).ToList();
-        //             break;
-        //         case "Category [Z -> A]":
-        //             products = products.OrderByDescending(p => p.categoryId).ToList();
-        //             break;
-        //         case "Price [Low -> High]":
-        //             products = products.OrderBy(p => p.price).ToList();
-        //             break;
-        //         case "Price [High -> Low]":
-        //             products = products.OrderByDescending(p => p.price).ToList();
-        //             break;
-        //         case "Name [A -> Z]":
-        //             products = products.OrderBy(p => p.name).ToList();
-        //             break;
-        //         case "Name [Z -> A]":
-        //             products = products.OrderByDescending(p => p.name).ToList();
-        //             break;
-        //             // default:
-        //             // MessageBox.Show("Unknown sort option selected.");
-        //             // return;
-        //     }
-        //     return products;
-        // }
+
+        public async Task<bool> AddProductCategoryAsync(ProductCategory productCategory, User currentUser)
+        {
+            if (currentUser == null
+            /*|| (currentUser.userType != "employee"
+                && currentUser.employeeData.isSenior) */)
+            { return false; }
+            ////#TODO/////////////
+            //senior check
+            ////////////////////////
+            //Validation for the:
+            //category
+            //name
+            //type
+            //description
+            /////////////////////
+            if (string.IsNullOrWhiteSpace(productCategory.categoryId))
+            { return false; }
+
+            return await _firebaseHelper.AddProductCategoryAsync(productCategory);
+        }
+
+        public async Task<List<Product>> GetProductsOrderedBy(/*string categoryId, */string selectedFilter)
+        {
+            var products = await _firebaseHelper.GetAllActiveProductsAsync();//GetProductsByCategoryAsync(/*categoryId*/);
+            switch (selectedFilter)
+            {
+                case "Category [A -> Z]":
+                    return products.OrderBy(p => p.categoryId).ToList();
+                case "Category [Z -> A]":
+                    return products.OrderByDescending(p => p.categoryId).ToList();
+                case "Price [Low -> High]":
+                    return products.OrderBy(p => p.price).ToList();
+                case "Price [High -> Low]":
+                    return products.OrderByDescending(p => p.price).ToList();
+                case "Name [A -> Z]":
+                    return products.OrderBy(p => p.name).ToList();
+                case "Name [Z -> A]":
+                    return products.OrderByDescending(p => p.name).ToList();
+                default:
+                    return products;
+                    // default:
+                    // MessageBox.Show("Unknown sort option selected.");
+                    // return;
+            }
+        }
 
 
         // public async Task<bool> AddProductToCart(string productId, int quantity)

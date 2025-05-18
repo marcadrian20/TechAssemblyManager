@@ -126,8 +126,8 @@ namespace TechAssemblyManager.UI
                 type = categoryTypeTextBox.Text.Trim(),
                 description = categoryDescriptionTextBox.Text.Trim()
             };
-
-            bool success = await firebaseHelper.AddProductCategoryAsync(category);
+            var currentUser = SessionManager.LoggedInUser;
+            bool success = await productManagerBLL.AddProductCategoryAsync(category, currentUser);
             lblStatus.Text = success ? "Category added." : "Failed to add category.";
         }
 
@@ -142,7 +142,7 @@ namespace TechAssemblyManager.UI
             //#TODO maybe make the currentUser a private variable within the class?
             //
             var currentUser = SessionManager.LoggedInUser;
-            
+
             var product = new Product
             {
                 productId = productIdTextBox.Text.Trim(),
@@ -165,39 +165,17 @@ namespace TechAssemblyManager.UI
             try
             {
                 flowLayoutPanelProducts.Controls.Clear();
-                var products = await firebaseHelper.GetAllActiveProductsAsync();
-
                 var selected = comboBoxSort.SelectedItem?.ToString();
                 if (string.IsNullOrWhiteSpace(selected))
                 {
                     MessageBox.Show("Please select a sorting option.");
                     return;
                 }
-
-                switch (selected)
-                {
-                    case "Category [A -> Z]":
-                        products = products.OrderBy(p => p.categoryId).ToList();
-                        break;
-                    case "Category [Z -> A]":
-                        products = products.OrderByDescending(p => p.categoryId).ToList();
-                        break;
-                    case "Price [Low -> High]":
-                        products = products.OrderBy(p => p.price).ToList();
-                        break;
-                    case "Price [High -> Low]":
-                        products = products.OrderByDescending(p => p.price).ToList();
-                        break;
-                    case "Name [A -> Z]":
-                        products = products.OrderBy(p => p.name).ToList();
-                        break;
-                    case "Name [Z -> A]":
-                        products = products.OrderByDescending(p => p.name).ToList();
-                        break;
-                    default:
-                        MessageBox.Show("Unknown sort option selected.");
-                        return;
-                }
+                var products = await productManagerBLL.GetProductsOrderedBy(selected);
+                //     default:
+                //         MessageBox.Show("Unknown sort option selected.");
+                //         return;
+                // }
 
                 foreach (var product in products)
                 {

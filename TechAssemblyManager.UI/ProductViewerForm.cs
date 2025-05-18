@@ -212,21 +212,21 @@ namespace TechAssemblyManager.UI
                   {
                      Nume = "Imprimantă HP LaserJet M110we",
                        Pret = 499,
-                         Imagine = ,
+                         //Imagine = ,
                           Categorie = "Imprimante"
                    },
                      new Produs
                      {
                          Nume = "Mouse Logitech G502",
                            Pret = 249,
-                         Imagine =Properties.Resources.,
+                         //Imagine =Properties.Resources.,
                              Categorie = "Mouse"
                      },
                        new Produs
                       {
                                 Nume = "Tastatură Redragon K552",
                                 Pret = 199,
-                                Imagine = ,
+                                //Imagine = ,
                                  Categorie = "Tastatura"
                       }
              };
