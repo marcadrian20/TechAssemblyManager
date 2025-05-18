@@ -8,14 +8,18 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using FirebaseWrapper;
+using TechAssemblyManager.BLL;
 using TechAssemblyManager.DAL.FirebaseHelper;
 using TechAssemblyManager.Models;
+
+
 
 namespace TechAssemblyManager.UI
 {
     public partial class DebugWindowForm : Form
     {
         private FirebaseHelper firebaseHelper;
+        private ProductManagerBLL productManagerBLL;
         public DebugWindowForm()
         {
             InitializeComponent();
@@ -28,7 +32,7 @@ namespace TechAssemblyManager.UI
                 "ky7wJX7Iu46hjBHWqDJNWjJW19NeYQurX4Z9VeUv",
                 "AIzaSyBxq3J01JqE6yonLc9plkzA6c3-Gi1r1eU"
             );
-
+            productManagerBLL = new ProductManagerBLL(firebaseHelper);
             if (firebaseHelper._status)
                 lblStatus.Text = "Connected";
             else lblStatus.Text = "Disconnected";
@@ -122,8 +126,8 @@ namespace TechAssemblyManager.UI
                 type = categoryTypeTextBox.Text.Trim(),
                 description = categoryDescriptionTextBox.Text.Trim()
             };
-
-            bool success = await firebaseHelper.AddProductCategoryAsync(category);
+            var currentUser = SessionManager.LoggedInUser;
+            bool success = await productManagerBLL.AddProductCategoryAsync(category, currentUser);
             lblStatus.Text = success ? "Category added." : "Failed to add category.";
         }
 
@@ -134,6 +138,10 @@ namespace TechAssemblyManager.UI
                 MessageBox.Show("Invalid price format.");
                 return;
             }
+            //
+            //#TODO maybe make the currentUser a private variable within the class?
+            //
+            var currentUser = SessionManager.LoggedInUser;
 
             var product = new Product
             {
@@ -148,7 +156,7 @@ namespace TechAssemblyManager.UI
                 categoryId = productCategoryIDTextBox.Text.Trim()
             };
 
-            bool success = await firebaseHelper.AddProductAsync(product);
+            bool success = await productManagerBLL.AddProductAsync(product, currentUser);
             lblStatus.Text = success ? "Product added." : "Failed to add product.";
         }
 
@@ -157,39 +165,17 @@ namespace TechAssemblyManager.UI
             try
             {
                 flowLayoutPanelProducts.Controls.Clear();
-                var products = await firebaseHelper.GetAllActiveProductsAsync();
-
                 var selected = comboBoxSort.SelectedItem?.ToString();
                 if (string.IsNullOrWhiteSpace(selected))
                 {
                     MessageBox.Show("Please select a sorting option.");
                     return;
                 }
-
-                switch (selected)
-                {
-                    case "Category [A -> Z]":
-                        products = products.OrderBy(p => p.categoryId).ToList();
-                        break;
-                    case "Category [Z -> A]":
-                        products = products.OrderByDescending(p => p.categoryId).ToList();
-                        break;
-                    case "Price [Low -> High]":
-                        products = products.OrderBy(p => p.price).ToList();
-                        break;
-                    case "Price [High -> Low]":
-                        products = products.OrderByDescending(p => p.price).ToList();
-                        break;
-                    case "Name [A -> Z]":
-                        products = products.OrderBy(p => p.name).ToList();
-                        break;
-                    case "Name [Z -> A]":
-                        products = products.OrderByDescending(p => p.name).ToList();
-                        break;
-                    default:
-                        MessageBox.Show("Unknown sort option selected.");
-                        return;
-                }
+                var products = await productManagerBLL.GetProductsOrderedBy(selected);
+                //     default:
+                //         MessageBox.Show("Unknown sort option selected.");
+                //         return;
+                // }
 
                 foreach (var product in products)
                 {
@@ -388,10 +374,10 @@ namespace TechAssemblyManager.UI
 
         private void mainTabControl_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if(mainTabControl.SelectedTab == mainTabControl.TabPages["tabPage4"])
+            if (mainTabControl.SelectedTab == mainTabControl.TabPages["tabPage4"])
             {
                 lblStatus.Text = "Reset Catalog Tab.";
-                comboBoxSort_SelectedIndexChanged(sender,e);
+                comboBoxSort_SelectedIndexChanged(sender, e);
             }
         }
     }

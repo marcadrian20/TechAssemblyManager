@@ -115,7 +115,7 @@ namespace FirebaseWrapper
         // Add Product Category
         public async Task<bool> AddProductCategoryAsync(ProductCategory category)
         {
-            if (string.IsNullOrWhiteSpace(category.categoryId)) return false;
+            // if (string.IsNullOrWhiteSpace(category.categoryId)) return false;
 
             try
             {
@@ -138,9 +138,8 @@ namespace FirebaseWrapper
         // Add Product
         public async Task<bool> AddProductAsync(Product product)
         {
-            if (string.IsNullOrWhiteSpace(product.productId)) return false;
-
-            // Check if category exists
+            // if (string.IsNullOrWhiteSpace(product.productId)) return false;
+            
             try
             {
                 var category = await GetAsync<ProductCategory>($"ProductCategories/{product.categoryId}");
