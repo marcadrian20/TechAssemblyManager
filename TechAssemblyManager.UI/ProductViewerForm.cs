@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using TechAssemblyManager.BLL;
 
 namespace TechAssemblyManager.UI
 {
@@ -26,10 +27,13 @@ namespace TechAssemblyManager.UI
         private ComboBox cmbCategorii;
         private Button btnAccount;
         private object instance;
-
+        /// <summary>
+        /// 
+        /// </summary>
+        private readonly ProductManagerBLL productManagerBLL;
         public ProductViewerForm Instance { get; set; }
 
-        public ProductViewerForm(MainForm mainForm, CartForm cartForm, string categorieInitiala = null)
+        public ProductViewerForm(MainForm mainForm, CartForm cartForm, ProductManagerBLL productManager, string categorieInitiala = null)
         {
             InitializeComponent();
             this.mainForm = mainForm;
@@ -39,7 +43,7 @@ namespace TechAssemblyManager.UI
             this.Size = new Size(1000, 700);
             this.BackColor = Color.FromArgb(245, 245, 245);
             this.Font = new Font("Segoe UI", 10);
-
+            productManagerBLL = productManager;
             InitializeLayout();
             LoadProduse();
 
@@ -204,9 +208,9 @@ namespace TechAssemblyManager.UI
                     Imagine = Properties.Resources.gaming_zmeu_max_amd_ryzen_3_3200g_36ghz_16gb_ddr4_1tb_ssd_amd_radeon_vega_8_iluminare_rgb_5aa76ce87e4c16367530ff2aa7414470,
                     Categorie = categorieRandom
                 };
-               
+
                 toateProdusele.Add(produs);
-                ratinguri[produs] = rand.Next(1, 6); 
+                ratinguri[produs] = rand.Next(1, 6);
             }
             for (int i = 1; i <= 20; i++)
             {
@@ -360,7 +364,7 @@ namespace TechAssemblyManager.UI
 
                 if (cartForm == null || cartForm.IsDisposed)
                 {
-                    cartForm = new CartForm(mainForm, this);
+                    cartForm = new CartForm(mainForm, productManagerBLL, this);
                     cartForm.Show();
                 }
                 else if (!cartForm.Visible)
@@ -478,7 +482,7 @@ namespace TechAssemblyManager.UI
 
         private void Account_Click(object sender, EventArgs e)
         {
-            AccountForm accForm = new AccountForm(mainForm, this, this.Instance);
+            AccountForm accForm = new AccountForm(mainForm, this, this.Instance, productManagerBLL);
             accForm.ShowDialog();
             this.Hide();
         }
@@ -512,7 +516,7 @@ namespace TechAssemblyManager.UI
         {
             if (cartForm == null)
             {
-                cartForm = new CartForm(this.mainForm, this);
+                cartForm = new CartForm(this.mainForm, productManagerBLL, this);
             }
 
             cartForm.SetProduse(AppState.GetProduse());

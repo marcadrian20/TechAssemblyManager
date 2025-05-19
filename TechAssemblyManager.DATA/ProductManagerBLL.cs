@@ -20,8 +20,9 @@ namespace TechAssemblyManager.BLL
         public async Task<bool> AddProductAsync(Product product, User currentUser)
         {
             if (string.IsNullOrWhiteSpace(product.productId) ||  ///Validation whether there's a valid category
-                currentUser == null //||                          //Or whether there is ab existing user 
-                                    //currentUser.userType != "employee"              //being an employee
+                currentUser == null ||                          //Or whether there is ab existing user 
+                currentUser.userType != "employee"
+                || !currentUser.employeeData.isSenior              //being an employee
                 )
             { return false; }
             //#TODO @Omixii add validation for Seniors
@@ -46,8 +47,8 @@ namespace TechAssemblyManager.BLL
         public async Task<bool> AddProductCategoryAsync(ProductCategory productCategory, User currentUser)
         {
             if (currentUser == null
-            /*|| (currentUser.userType != "employee"
-                && currentUser.employeeData.isSenior) */)
+            || currentUser.userType != "employee"
+                || !currentUser.employeeData.isSenior)
             { return false; }
             ////#TODO/////////////
             //senior check

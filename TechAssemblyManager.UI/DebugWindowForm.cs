@@ -20,6 +20,11 @@ namespace TechAssemblyManager.UI
     {
         private FirebaseHelper firebaseHelper;
         private ProductManagerBLL productManagerBLL;
+        private OrderManagerBLL orderManagerBLL;
+        private PromotionManagerBLL promotionManagerBLL;
+        private UserManagerBLL userManagerBLL;
+        private System.Windows.Forms.Timer employeeSearchDebounceTimer;
+
         public DebugWindowForm()
         {
             InitializeComponent();
@@ -32,43 +37,44 @@ namespace TechAssemblyManager.UI
                 "ky7wJX7Iu46hjBHWqDJNWjJW19NeYQurX4Z9VeUv",
                 "AIzaSyBxq3J01JqE6yonLc9plkzA6c3-Gi1r1eU"
             );
+            userManagerBLL = new UserManagerBLL(firebaseHelper);
             productManagerBLL = new ProductManagerBLL(firebaseHelper);
             if (firebaseHelper._status)
                 lblStatus.Text = "Connected";
             else lblStatus.Text = "Disconnected";
+
+
+            //DEBOUNCE
+            employeeSearchDebounceTimer = new System.Windows.Forms.Timer();
+            employeeSearchDebounceTimer.Interval = 300; // ms
+            employeeSearchDebounceTimer.Tick += async (s, ev) =>
+            {
+                employeeSearchDebounceTimer.Stop();
+                await LoadEmployeesAsync();
+            };
+
         }
 
         private async void signUpButton_Click(object sender, EventArgs e)
         {
-            bool isSignedUp = await firebaseHelper.SignUpAsync(emailTextBox.Text, passwordTextBox.Text, userNameTextBox.Text);
+            bool isSignedUp = await userManagerBLL.RegisterUserAsync(
+                                        emailTextBox.Text,
+                                        passwordTextBox.Text,
+                                        userNameTextBox.Text,
+                                        firstNameTextBox.Text,
+                                        lastNameTextBox.Text,
+                                        addressTextBox.Text,
+                                        phoneNumberTextBox.Text
+                                    );
+
             if (!isSignedUp)
             {
                 lblStatus.Text = "There was a problem at Sign Up!";
                 return;
             }
-            var user = new TechAssemblyManager.Models.User
-            {
-                createdAt = DateTime.UtcNow.ToString("o"),
-                email = emailTextBox.Text,
-                firstName = firstNameTextBox.Text,
-                lastName = lastNameTextBox.Text,
-                userName = userNameTextBox.Text,
-                passwordHash = BCrypt.Net.BCrypt.HashPassword(passwordTextBox.Text),
-                userType = "customer",
-                customerData = new CustomerData
-                {
-                    address = addressTextBox.Text,
-                    phoneNumber = phoneNumberTextBox.Text
-                },
-                employeeData = new EmployeeData
-                {
-                    isSenior = false
-                },
-                selectedProducts = new Dictionary<string, SelectedProduct>()
-            };
 
-            await firebaseHelper.SetAsync($"Users/{user.userName}", user);
             lblStatus.Text = "User signed up!";
+            var user = await userManagerBLL.GetUserByUsernameAsync(userNameTextBox.Text);
 
             SessionManager.LoggedInUser = user;
             lblStatus.Text = $"Welcome, {user.userName}!";
@@ -82,7 +88,7 @@ namespace TechAssemblyManager.UI
 
         private async void logInButton_Click(object sender, EventArgs e)
         {
-            var user = await firebaseHelper.LoginAsync(loginUserOrEmailTextBox.Text, loginPasswordTextBox.Text);
+            var user = await userManagerBLL.LoginAsync(loginUserOrEmailTextBox.Text, loginPasswordTextBox.Text);
 
             if (user == null)
             {
@@ -372,13 +378,160 @@ namespace TechAssemblyManager.UI
             lblStatus.Text = success ? "Promotion added." : "Failed to add promotion.";
         }
 
-        private void mainTabControl_SelectedIndexChanged(object sender, EventArgs e)
+        private async void mainTabControl_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (mainTabControl.SelectedTab == mainTabControl.TabPages["tabPage4"])
             {
                 lblStatus.Text = "Reset Catalog Tab.";
                 comboBoxSort_SelectedIndexChanged(sender, e);
             }
+            if (mainTabControl.SelectedTab == mainTabControl.TabPages["tabPage7"])
+            {
+                lblStatus.Text = "Management Tab.";
+                await LoadEmployeesAsync();
+            }
         }
+
+        private async void EmployeeSearchBar_TextChanged(object sender, EventArgs e)
+        {
+            employeeSearchDebounceTimer.Stop();
+            employeeSearchDebounceTimer.Start();
+        }
+
+        private async Task LoadEmployeesAsync()
+        {
+            flowLayoutPanelEmployees.Controls.Clear();
+            var employees = await userManagerBLL.GetAllEmployeesAsync();
+
+            string search = EmployeeSearchBar.Text.Trim().ToLower();
+            if (!string.IsNullOrEmpty(search))
+            {
+                employees = employees.Where(emp =>
+                    emp.userName.ToLower().Contains(search) ||
+                    emp.firstName.ToLower().Contains(search) ||
+                    emp.lastName.ToLower().Contains(search) ||
+                    emp.email.ToLower().Contains(search)
+                ).ToList();
+            }
+
+            foreach (var emp in employees)
+            {
+                var panel = new Panel
+                {
+                    Width = 300,
+                    Height = 120,
+                    BorderStyle = BorderStyle.FixedSingle,
+                    Margin = new Padding(5),
+                    AutoScroll = true
+                };
+
+                int paddingTop = 5;
+
+                var label = new Label
+                {
+                    Text = $"Username: {emp.userName}\nName: {emp.firstName} {emp.lastName}\nEmail: {emp.email}\nRole: {(emp.employeeData.isSenior ? "Senior" : "Junior")}",
+                    Width = 280,
+                    Height = 60,
+                    Left = 5,
+                    Top = paddingTop
+                };
+                panel.Controls.Add(label);
+                paddingTop += label.Height + 5;
+
+                // Only manager can promote/demote
+                if (SessionManager.LoggedInUser != null && userManagerBLL.IsManager(SessionManager.LoggedInUser))
+                {
+                    var buttonPromoteDemote = new Button
+                    {
+                        Text = emp.employeeData.isSenior ? "Demote to Junior" : "Promote to Senior",
+                        Tag = emp.userName,
+                        Width = 180,
+                        Height = 30,
+                        Left = 5,
+                        Top = paddingTop
+                    };
+                    buttonPromoteDemote.Click += async (s, ev) =>
+                    {
+                        bool newSeniority = !emp.employeeData.isSenior;
+                        bool result = await userManagerBLL.UpdateEmployeeRoleAsync(emp.userName, newSeniority);
+                        lblStatus.Text = result
+                            ? (newSeniority ? "Promoted to Senior." : "Demoted to Junior.")
+                            : "Failed to update role.";
+                        await LoadEmployeesAsync();
+                    };
+                    panel.Controls.Add(buttonPromoteDemote);
+                    paddingTop += buttonPromoteDemote.Height + 5;
+                }
+
+                panel.Height = paddingTop + 5;
+                flowLayoutPanelEmployees.Controls.Add(panel);
+            }
+        }
+        private void ShowAddEmployeeForm()
+        {
+            flowLayoutPanelEmployees.Controls.Clear();
+
+            // Create controls for adding employee
+            var emailBox = new TextBox { PlaceholderText = "Email", Width = 250 };
+            var userNameBox = new TextBox { PlaceholderText = "Username", Width = 250 };
+            var passwordBox = new TextBox { PlaceholderText = "Password", Width = 250, UseSystemPasswordChar = true };
+            var firstNameBox = new TextBox { PlaceholderText = "First Name", Width = 250 };
+            var lastNameBox = new TextBox { PlaceholderText = "Last Name", Width = 250 };
+            var phoneBox = new TextBox { PlaceholderText = "Phone", Width = 250 };
+            var addressBox = new TextBox { PlaceholderText = "Address", Width = 250 };
+            var isSeniorBox = new CheckBox { Text = "Is Senior", Width = 250 };
+            var addButton = new Button { Text = "Add Employee", Width = 250 };
+
+            addButton.Click += async (s, e) =>
+            {
+                if (SessionManager.LoggedInUser == null || !userManagerBLL.IsManager(SessionManager.LoggedInUser))
+                {
+                    MessageBox.Show("Only managers can add employees.");
+                    return;
+                }
+
+                var employee = new User
+                {
+                    email = emailBox.Text,
+                    userName = userNameBox.Text,
+                    firstName = firstNameBox.Text,
+                    lastName = lastNameBox.Text,
+                    passwordHash = passwordBox.Text, // Will be hashed in BLL
+                    userType = "employee",
+                    employeeData = new EmployeeData { isSenior = isSeniorBox.Checked },
+                    customerData = new CustomerData { address = addressBox.Text, phoneNumber = phoneBox.Text }
+                };
+
+                bool result = await userManagerBLL.AddEmployeeAsync(employee);
+                lblStatus.Text = result ? "Employee added." : "Failed to add employee (duplicate username/email?)";
+                if (result)
+                {
+                    EmployeeAddCheckbox.Checked = false; // Switch back to view mode
+                    await LoadEmployeesAsync();
+                }
+            };
+
+            flowLayoutPanelEmployees.Controls.Add(emailBox);
+            flowLayoutPanelEmployees.Controls.Add(userNameBox);
+            flowLayoutPanelEmployees.Controls.Add(passwordBox);
+            flowLayoutPanelEmployees.Controls.Add(firstNameBox);
+            flowLayoutPanelEmployees.Controls.Add(lastNameBox);
+            flowLayoutPanelEmployees.Controls.Add(phoneBox);
+            flowLayoutPanelEmployees.Controls.Add(addressBox);
+            flowLayoutPanelEmployees.Controls.Add(isSeniorBox);
+            flowLayoutPanelEmployees.Controls.Add(addButton);
+        }
+        private async void EmployeeAddCheckbox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (EmployeeAddCheckbox.Checked)
+            {
+                ShowAddEmployeeForm();
+            }
+            else
+            {
+                await LoadEmployeesAsync();
+            }
+        }
+
     }
 }

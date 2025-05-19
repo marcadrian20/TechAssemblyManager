@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
+using TechAssemblyManager.BLL;
 
 namespace TechAssemblyManager.UI
 {
@@ -13,6 +14,7 @@ namespace TechAssemblyManager.UI
         private CartForm cartForm;
         private MainForm _mainForm;
         private ProductViewerForm _productViewerForm;
+        private ProductManagerBLL productManagerBLL;
         public Label lblPassword;
         private Button btnAutentificare;
         private Label lblComenzi;
@@ -20,13 +22,14 @@ namespace TechAssemblyManager.UI
         private MainForm.User utilizator;
         public MainForm Instance { get; }
         // Constructor cu parametrul Form f
-        public AccountForm(MainForm mainForm, Form f, ProductViewerForm productViewerForm)
+        public AccountForm(MainForm mainForm, Form f, ProductViewerForm productViewerForm, ProductManagerBLL productManagerBLL)
         {
             InitializeComponent();
             this.f = f;
             _productViewerForm = productViewerForm;
             _mainForm = mainForm;
-            Instance = mainForm.Instance??mainForm;
+            this.productManagerBLL = productManagerBLL;
+            Instance = mainForm.Instance ?? mainForm;
             utilizator = AppState.UtilizatorCurent;
             // Inițializează lblPassword și adaugă-l la formular
             lblPassword = new Label();
@@ -117,7 +120,7 @@ namespace TechAssemblyManager.UI
                 {
                     tipCont = "Manager";
                 }
-                else 
+                else
                 {
                     tipCont = "Angajat";
                 }
@@ -159,7 +162,7 @@ namespace TechAssemblyManager.UI
                 b.Items.Add($"Date livrare: {orderData.Nume}, {orderData.Adresa}, {orderData.Telefon}, {orderData.Email}");
                 if (cartForm == null)
                 {
-                    cartForm = new CartForm(_mainForm, _productViewerForm);
+                    cartForm = new CartForm(_mainForm, productManagerBLL, _productViewerForm);
                 }
                 cartForm.SetProduse(AppState.GetProduse());
                 if (cartForm != null)
@@ -219,7 +222,8 @@ namespace TechAssemblyManager.UI
                     Text = "Adaugă produs nou",
                     Width = 150
                 };
-                btnAdaugaProdus.Click += (s, ev) => {
+                btnAdaugaProdus.Click += (s, ev) =>
+                {
                     var form = new AdaugaProdusForm(_productViewerForm, _mainForm);
                     form.FormClosed += (se, ea) => _mainForm.Show(); // <- revine la MainForm
                     form.Show();
@@ -231,7 +235,8 @@ namespace TechAssemblyManager.UI
                     Text = "Vezi comenzi de onorat",
                     Width = 180
                 };
-                btnComenzi.Click += (s, ev) => {
+                btnComenzi.Click += (s, ev) =>
+                {
                     {
                         var form = new OnorareComenziForm(user, this.Instance);
                         form.FormClosed += (se, ea) => _mainForm.Show(); // <- revine la MainForm
@@ -246,7 +251,8 @@ namespace TechAssemblyManager.UI
                     Text = "Vezi cereri service",
                     Width = 180
                 };
-                btnService.Click += (s, ev) => {
+                btnService.Click += (s, ev) =>
+                {
                     {
                         var form = new VizualizareCereriForm(user, this.Instance);
                         form.FormClosed += (se, ea) => _mainForm.Show(); // <- revine la MainForm
@@ -263,9 +269,10 @@ namespace TechAssemblyManager.UI
                     Text = "Vezi comenzi de onorat",
                     Width = 180
                 };
-                btnComenzi.Click += (s, ev) => {
-                    var form=new OnorareComenziForm(user, this.Instance);
-                     form.FormClosed += (se, ea) => _mainForm.Show(); // <- revine la MainForm
+                btnComenzi.Click += (s, ev) =>
+                {
+                    var form = new OnorareComenziForm(user, this.Instance);
+                    form.FormClosed += (se, ea) => _mainForm.Show(); // <- revine la MainForm
                     form.Show();
                 };
                 this.Controls.Add(btnComenzi);
@@ -275,8 +282,9 @@ namespace TechAssemblyManager.UI
                     Text = "Vezi cereri service",
                     Width = 180
                 };
-                btnService.Click += (s, ev) => {
-                    var form = new VizualizareCereriForm(user,_mainForm);
+                btnService.Click += (s, ev) =>
+                {
+                    var form = new VizualizareCereriForm(user, _mainForm);
                     form.ShowDialog();
                 };
                 this.Controls.Add(btnService);
@@ -296,7 +304,7 @@ namespace TechAssemblyManager.UI
                     Text = "Gestionare Angajați",
                     Width = 180
                 };
-                btnGestionareAngajati.Click += (s, ev) =>new ManagerForm().ShowDialog();
+                btnGestionareAngajati.Click += (s, ev) => new ManagerForm().ShowDialog();
                 this.Controls.Add(btnGestionareAngajati);
             }
         }
@@ -349,7 +357,7 @@ namespace TechAssemblyManager.UI
         public bool PlaseazaComanda(MainForm.User user, OrderData orderData)
         {
             if (cartForm == null)
-                cartForm = new CartForm(_mainForm);
+                cartForm = new CartForm(_mainForm, productManagerBLL);
 
             cartForm.SetProduse(AppState.GetProduse());
             List<Produs> produse = cartForm.GetProduse();
@@ -374,7 +382,7 @@ namespace TechAssemblyManager.UI
             return true;
         }
 
-        private  string GetTipCont(MainForm.User utilizator)
+        private string GetTipCont(MainForm.User utilizator)
         {
             if (utilizator is AngajatSenior) return "Angajat Senior";
             if (utilizator is AngajatJunior) return "Angajat Junior";

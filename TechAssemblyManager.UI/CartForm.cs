@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
+using TechAssemblyManager.BLL;
 
 namespace TechAssemblyManager.UI
 {
@@ -13,16 +14,18 @@ namespace TechAssemblyManager.UI
         private MainForm mainForm2;
         private OnorareComenziForm onorareComenziForm;
         private ProductViewerForm prvf;
+        private readonly ProductManagerBLL productManagerBLL;
 
-        public CartForm(MainForm mainForm)
+        public CartForm(MainForm mainForm, ProductManagerBLL productManagerBLL)
         {
             InitializeComponent();
             this.mainForm = mainForm;
             this.Load += CartForm_Load;
             this.Resize += CartForm_Load;
+            this.productManagerBLL = productManagerBLL;
         }
 
-        public CartForm(MainForm mainForm, ProductViewerForm productViewerForm = null)
+        public CartForm(MainForm mainForm, ProductManagerBLL productManagerBLL, ProductViewerForm productViewerForm = null)
         {
             InitializeComponent();
             this.productViewerForm = productViewerForm;
@@ -75,7 +78,7 @@ namespace TechAssemblyManager.UI
             // Margini rotunjite și culori
             Color accentColor = Color.FromArgb(0, 120, 215); // Albastru Windows
 
-            Button[] buttons = { backbutton,  Myaccount, PlasareComanda };
+            Button[] buttons = { backbutton, Myaccount, PlasareComanda };
             foreach (Button btn in buttons)
             {
                 btn.FlatStyle = FlatStyle.Flat;
@@ -147,7 +150,7 @@ namespace TechAssemblyManager.UI
                     }
                 }
             }
-           Total.Text = $"Total: {total} RON";
+            Total.Text = $"Total: {total} RON";
         }
 
 
@@ -178,7 +181,7 @@ namespace TechAssemblyManager.UI
         }
         private void Myaccount_Click(object sender, EventArgs e)
         {
-            AccountForm accForm = new AccountForm(mainForm, this,productViewerForm);
+            AccountForm accForm = new AccountForm(mainForm, this, productViewerForm, productManagerBLL);
             accForm.ShowDialog();
             this.Hide();
         }

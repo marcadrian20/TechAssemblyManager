@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
+using TechAssemblyManager.BLL;
 
 namespace TechAssemblyManager.UI
 {
@@ -14,6 +15,8 @@ namespace TechAssemblyManager.UI
         public CartForm cartForm;
         private ProductViewerForm prvf;
         private AccountForm accountForm;
+        private ProductManagerBLL productManagerBLL;
+
         public OnorareComenziForm(MainForm.User user,MainForm mainForm)
         {
             if (mainForm == null || mainForm.Instance == null)
@@ -52,7 +55,7 @@ namespace TechAssemblyManager.UI
         {
             if (cartForm == null)
             {
-                cartForm = new CartForm(mainForm,prvf);
+                cartForm = new CartForm(mainForm, productManagerBLL, prvf);
             }
             cartForm.SetProduse(AppState.GetProduse());
             if (cartForm != null)
@@ -91,7 +94,7 @@ namespace TechAssemblyManager.UI
             }
             if (cartForm == null)
             {
-                cartForm = new CartForm(mainForm, prvf);
+                cartForm = new CartForm(mainForm, productManagerBLL, prvf);
             }
             cartForm.SetProduse(AppState.GetProduse());
             if (cartForm != null)

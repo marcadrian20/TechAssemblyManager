@@ -3,11 +3,17 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
+using FirebaseWrapper;
+using TechAssemblyManager.Models;
+using TechAssemblyManager.BLL;
 
 namespace TechAssemblyManager.UI
 {
     public partial class MainForm : Form
     {
+        /// 
+        /// /REFACTOR
+        /// 
         PromotiiForm promotiiForm;
         public CartForm cartForm;
         ProductViewerForm prvf;
@@ -17,13 +23,36 @@ namespace TechAssemblyManager.UI
         private Button Login;
         private Button btnIstoricService;
         Form f;
-        private List<Produs> produseInCos = new List<Produs>();
+        private List<Product> produseInCos = new List<Product>();
+
+        //END REFACTOR
+        //HELPER&BLL
+        private User currentUser;
+        private FirebaseHelper firebaseHelper;
+        private ProductManagerBLL productManagerBLL;
+        private UserManagerBLL userManagerBLL;
+        private OrderManagerBLL orderManagerBLL;
+        private PromotionManagerBLL promotionManagerBLL;
+
+        /// ////
         public MainForm()
         {
             InitializeComponent();
+            firebaseHelper = new FirebaseHelper(
+                "https://techassemblymanager-default-rtdb.firebaseio.com/",
+                "ky7wJX7Iu46hjBHWqDJNWjJW19NeYQurX4Z9VeUv",
+                "AIzaSyBxq3J01JqE6yonLc9plkzA6c3-Gi1r1eU"
+            );
+            productManagerBLL = new ProductManagerBLL(firebaseHelper);
+            userManagerBLL = new UserManagerBLL(firebaseHelper);
+            orderManagerBLL = new OrderManagerBLL(); // Implement as needed
+            promotionManagerBLL = new PromotionManagerBLL(); // Implement as needed
+
+
+            ////ANALYZE DOWN BELOW
             this.KeyPreview = true;
             Instance = this;
-            prvf = new ProductViewerForm(this, null);
+            prvf = new ProductViewerForm(this, null, productManagerBLL, null);
             if (Login == null)
             {
                 Login = new Button()
@@ -65,6 +94,7 @@ namespace TechAssemblyManager.UI
             InitializeComponent();
         }
 
+        //DEBUG
         private void MainForm_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Control && e.KeyCode == Keys.D)
@@ -73,7 +103,7 @@ namespace TechAssemblyManager.UI
                 debugForm.Show();
             }
         }
-
+        //END DEBUG
         private void ViewCatalog_Click(object sender, EventArgs e)
         {
             CatalogProduse c = new CatalogProduse(this.Instance);
@@ -95,8 +125,8 @@ namespace TechAssemblyManager.UI
         }
         private void Myaccount_Click(object sender, EventArgs e)
         {
-            var productViewerForm = new ProductViewerForm(this, cartForm); // Pass the current MainForm and CartForm
-            var accountForm = new AccountForm(this, this, productViewerForm); // Pass MainForm, current form, and ProductViewerForm
+            var productViewerForm = new ProductViewerForm(this, cartForm, productManagerBLL, null); // Pass the current MainForm and CartForm
+            var accountForm = new AccountForm(this, this, productViewerForm, productManagerBLL); // Pass MainForm, current form, and ProductViewerForm
             accountForm.Show();
             this.Hide(); //
         }
@@ -118,7 +148,7 @@ namespace TechAssemblyManager.UI
         {
             if (cartForm == null)
             {
-                cartForm = new CartForm(this, prvf);
+                cartForm = new CartForm(this, productManagerBLL, prvf);
             }
 
             cartForm.SetProduse(AppState.GetProduse());
@@ -149,38 +179,38 @@ namespace TechAssemblyManager.UI
         }
 
         public MainForm Instance { get; }
-        public class User
-        {
-            public string Nume { get; set; }
-            public string Email { get; set; }
-            public List<Comanda> Comenzi { get; set; }
-            public bool EsteAutentificat { get;  set; }
-            public OrderData DateLivrare { get; set; }
+        // public class User
+        // {
+        //     public string Nume { get; set; }
+        //     public string Email { get; set; }
+        //     public List<Comanda> Comenzi { get; set; }
+        //     public bool EsteAutentificat { get; set; }
+        //     public OrderData DateLivrare { get; set; }
 
-            private string parola;
+        //     private string parola;
 
-            public User(string nume, string email)
-            {
-                Nume = nume;
-                Email = email;
-                Comenzi = new List<Comanda>();
-                parola = "admin123"; 
-                EsteAutentificat = false;
+        //     public User(string nume, string email)
+        //     {
+        //         Nume = nume;
+        //         Email = email;
+        //         Comenzi = new List<Comanda>();
+        //         parola = "admin123";
+        //         EsteAutentificat = false;
 
-            }
+        //     }
 
-            public bool Autentifica(string parolaIntrodusa)
-            {
-                if (parolaIntrodusa == parola)
-                {
-                    EsteAutentificat = true;
-                    return true;
-                }
-                return false;
-            }
-        }
+        //     public bool Autentifica(string parolaIntrodusa)
+        //     {
+        //         if (parolaIntrodusa == parola)
+        //         {
+        //             EsteAutentificat = true;
+        //             return true;
+        //         }
+        //         return false;
+        //     }
+        // }
 
-        private void Login_Click(object sender, EventArgs e)
+        private async void Login_Click(object sender, EventArgs e)
         {
             Logare logare = new Logare(this.Instance);
             logare.Show();

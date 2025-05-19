@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TechAssemblyManager.BLL
 {
-    internal class OrderManagerBLL
+    public class OrderManagerBLL
     {
     }
 }

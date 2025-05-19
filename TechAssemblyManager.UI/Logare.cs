@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Windows.Forms;
 using System.Drawing;
-
+using TechAssemblyManager.Models;
+using TechAssemblyManager.BLL;
+using TechAssemblyManager.DAL.FirebaseHelper;
 namespace TechAssemblyManager.UI
 {
     public partial class Logare : Form
@@ -13,6 +15,7 @@ namespace TechAssemblyManager.UI
         private Label lblEmail;
         private Label lblParola;
         private MainForm mainForm;
+        private UserManagerBLL userManagerBLL;
         public Logare(MainForm mainForm)
         {
             this.mainForm = mainForm;
@@ -41,35 +44,39 @@ namespace TechAssemblyManager.UI
         }
         private void LogareForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-           if(mainForm != null && !mainForm.IsDisposed)
+            if (mainForm != null && !mainForm.IsDisposed)
             {
                 mainForm.Show();
             }
         }
-        private void BtnSignIn_Click(object sender, EventArgs e)
+        private async void BtnSignIn_Click(object sender, EventArgs e)
         {
-            string email = txtEmail.Text;
-            string parola = txtParola.Text;
+            // string email = txtEmail.Text;
+            // string parola = txtParola.Text;
 
-            if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(parola))
+            if (string.IsNullOrWhiteSpace(txtEmail.Text) || string.IsNullOrWhiteSpace(txtParola.Text))
             {
                 MessageBox.Show("Completați toate câmpurile.");
                 return;
             }
 
             // Aici se face autentificarea
-            MainForm.User user = UserManager.GetUserByEmail(email);
-            if (user != null && user.Autentifica(parola))
+            // MainForm.User user = UserManager.GetUserByEmail(email);
+            var user = await userManagerBLL.LoginAsync(txtEmail.Text, txtParola.Text);
+
+            //
+            //# TODO ADD STATUS LABEL OR A POPUP IF THE USER IS NULL
+            //
+            if (user == null)
             {
-                AppState.UtilizatorCurent = user; // Stocare corectă
-                MessageBox.Show("Autentificat cu succes!");
-                this.Hide();
-                new MainForm().Show();
+                MessageBox.Show("Login failed. Check your credentials.");
+                return;
             }
-            else
-            {
-                MessageBox.Show("Email sau parolă incorectă.");
-            }
+            SessionManager.LoggedInUser = user;
+            MessageBox.Show("Autentificat cu succes!");
+            this.Hide();
+            new MainForm().Show();
+
         }
 
 

@@ -77,7 +77,7 @@ namespace FirebaseWrapper
             try
             {
                 var user = await GetAsync<TechAssemblyManager.Models.User>($"Users/{promotion.createdBy}");
-                if(user.userType != "manager")
+                if (user.userType != "manager")
                 {
                     //MessageBox.Show("The currently Logged In User is not a Manager.");
                     return false;
@@ -139,7 +139,7 @@ namespace FirebaseWrapper
         public async Task<bool> AddProductAsync(Product product)
         {
             // if (string.IsNullOrWhiteSpace(product.productId)) return false;
-            
+
             try
             {
                 var category = await GetAsync<ProductCategory>($"ProductCategories/{product.categoryId}");
@@ -182,6 +182,86 @@ namespace FirebaseWrapper
             var response = await GetAsync<Dictionary<string, Product>>("Products");
             var allProducts = response?.Values?.ToList() ?? new List<Product>();
             return allProducts.Where(p => p.isActive).ToList();
+        }
+
+        //ADDED BY MARK:
+        // Employee Management
+        public async Task<List<TechAssemblyManager.Models.User>> GetAllEmployeesAsync()
+        {
+            var users = await GetAsync<Dictionary<string, TechAssemblyManager.Models.User>>("Users");
+            return users?.Values.Where(u => u.userType == "employee").ToList() ?? new List<TechAssemblyManager.Models.User>();
+        }
+        public async Task UpdateEmployeeAsync(TechAssemblyManager.Models.User employee)
+        {
+            await UpdateAsync($"Users/{employee.userName}", employee);
+        }
+
+        // Order Management
+        public async Task AddOrderAsync(Order order)
+        {
+            await PushAsync("Orders", order);
+        }
+        public async Task<List<Order>> GetOrdersByClientAsync(string clientUserName)
+        {
+            var orders = await GetAsync<Dictionary<string, Order>>("Orders");
+            return orders?.Values.Where(o => o.ClientUserName == clientUserName).ToList() ?? new List<Order>();
+        }
+        public async Task UpdateOrderStatusAsync(string orderId, string status)
+        {
+            var order = await GetAsync<Order>($"Orders/{orderId}");
+            if (order != null)
+            {
+                order.OrderStatus = status;
+                await UpdateAsync($"Orders/{orderId}", order);
+            }
+        }
+
+        // Service Request Management
+        public async Task AddServiceRequestAsync(ServiceRequest request)
+        {
+            await PushAsync("ServiceRequests", request);
+        }
+        public async Task<List<ServiceRequest>> GetServiceRequestsByClientAsync(string clientUserName)
+        {
+            var requests = await GetAsync<Dictionary<string, ServiceRequest>>("ServiceRequests");
+            return requests?.Values.Where(r => r.CustomerUserName == clientUserName).ToList() ?? new List<ServiceRequest>();
+        }
+        public async Task UpdateServiceRequestStatusAsync(string requestId, string status)
+        {
+            var request = await GetAsync<ServiceRequest>($"ServiceRequests/{requestId}");
+            if (request != null)
+            {
+                request.Status = status;
+                await UpdateAsync($"ServiceRequests/{requestId}", request);
+            }
+        }
+
+        // Product Filtering
+        public async Task<List<Product>> GetProductsByCategoryAsync(string categoryId)
+        {
+            var products = await GetAsync<Dictionary<string, Product>>("Products");
+            return products?.Values.Where(p => p.categoryId == categoryId && p.isActive).ToList() ?? new List<Product>();
+        }
+
+        // Promotion Management
+        public async Task<List<Promotion>> GetAllPromotionsAsync()
+        {
+            var promotions = await GetAsync<Dictionary<string, Promotion>>("Promotions");
+            return promotions?.Values.ToList() ?? new List<Promotion>();
+        }
+
+        // Cart/Selected Products
+        public async Task AddProductToCartAsync(string userName, string productId, int quantity)
+        {
+            await SetAsync($"Users/{userName}/selectedProducts/{productId}", new SelectedProduct { quantity = quantity });
+        }
+        public async Task<Dictionary<string, SelectedProduct>> GetUserCartAsync(string userName)
+        {
+            return await GetAsync<Dictionary<string, SelectedProduct>>($"Users/{userName}/selectedProducts") ?? new Dictionary<string, SelectedProduct>();
+        }
+        public async Task RemoveProductFromCartAsync(string userName, string productId)
+        {
+            await DeleteAsync($"Users/{userName}/selectedProducts/{productId}");
         }
 
         public async Task SetAsync<T>(string path, T data) where T : class

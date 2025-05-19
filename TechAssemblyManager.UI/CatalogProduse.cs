@@ -2,6 +2,7 @@
 using System;
 using System.Drawing;
 using System.Windows.Forms;
+using TechAssemblyManager.BLL;
 
 namespace TechAssemblyManager.UI
 {
@@ -10,6 +11,7 @@ namespace TechAssemblyManager.UI
         private FlowLayoutPanel pcComponentsSidebar; // FlowLayoutPanel pentru componentele PC
         private MainForm m;
         private CartForm cartForm;
+        private ProductManagerBLL productManagerBLL;
         private ProductViewerForm prvf;
         private readonly string[] categoriiProduse = { "Toate", "Laptopuri", "Desktopuri", "Monitoare" };
 
@@ -66,7 +68,7 @@ namespace TechAssemblyManager.UI
                 btn.Click += (s, e) =>
                 {
                     this.Hide();
-                    ProductViewerForm pvf = new ProductViewerForm(m, cartForm, componenta);
+                    ProductViewerForm pvf = new ProductViewerForm(m, cartForm, productManagerBLL, componenta);
                     pvf.Show();
                 };
 
@@ -207,7 +209,7 @@ namespace TechAssemblyManager.UI
                 {
                     string categorieAleasa = (string)((Button)s).Tag;
                     this.Hide(); // ascundem CatalogProduse
-                    ProductViewerForm pvf = new ProductViewerForm(m, cartForm, categorieAleasa); // trimitem categoria
+                    ProductViewerForm pvf = new ProductViewerForm(m, cartForm, productManagerBLL, categorieAleasa); // trimitem categoria
                     pvf.Show();
                 };
 
@@ -233,7 +235,7 @@ namespace TechAssemblyManager.UI
             btnProduse.Click += (s, e) =>
             {
                 this.Hide(); // ascundem fereastra actuală
-                ProductViewerForm pvf = new ProductViewerForm(m, cartForm);
+                ProductViewerForm pvf = new ProductViewerForm(m, cartForm, productManagerBLL);
                 pvf.Text = "ProductViwerForm";
                 pvf.Show();
             };
@@ -261,7 +263,7 @@ namespace TechAssemblyManager.UI
 
         private void Myaccount_Click(object sender, EventArgs e)
         {
-            AccountForm accForm = new AccountForm(m, this,prvf);
+            AccountForm accForm = new AccountForm(m, this,prvf, productManagerBLL);
             accForm.ShowDialog();
             this.Hide();
         }
@@ -286,7 +288,7 @@ namespace TechAssemblyManager.UI
         {
             if (cartForm == null)
             {
-                cartForm = new CartForm(m);
+                cartForm = new CartForm(m, productManagerBLL);
             }
 
             cartForm.SetProduse(AppState.GetProduse());

@@ -5,26 +5,10 @@ namespace TechAssemblyManager.Models
 {
     public class OrderItem
     {
-        [Key]
-        public int OrderItemId { get; set; }
-
-        //FKeys
-        public int OrderId { get; set; }
-        public int ProductId { get; set; }
-        public int PromotionId { get; set; }
-
-        [ForeignKey("OrderId")]
-        public virtual Order Order { get; set; }
-        [ForeignKey("ProductId")]
-        public virtual Product Product { get; set; }
-
-        [ForeignKey("PromotionId")]
-        //public virtual Promotion Promotion { get; set; }
-
-        [Required]
+        public string ProductId { get; set; }
+        public string PromotionId { get; set; } // Optional, for promotions
         public int Quantity { get; set; }
-
-        [Required]
         public decimal Price { get; set; }
+        public bool IsPromotion { get; set; } // True if this is a promotion cart item
     }
 }

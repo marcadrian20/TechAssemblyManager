@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Windows.Forms;
 using System.Drawing;
+using TechAssemblyManager.BLL;
+using TechAssemblyManager.DAL.FirebaseHelper;
 
 namespace TechAssemblyManager.UI
 {
@@ -14,6 +16,7 @@ namespace TechAssemblyManager.UI
         private Label lblEmail;
         private Label lblParola;
         private MainForm mainForm;
+        private UserManagerBLL userManagerBLL;
         public SignUpForm(MainForm mainForm)
         {
             this.mainForm = mainForm;
@@ -31,7 +34,7 @@ namespace TechAssemblyManager.UI
             txtParola = new TextBox() { Location = new Point(100, 100), Width = 150 };
 
             btnCreeazaCont = new Button() { Text = "Crează cont", Location = new Point(100, 150), Width = 100 };
-            btnCreeazaCont.Click += BtnCreeazaCont_Click;
+            btnCreeazaCont.Click += BtnCreeazaCont_ClickAsync;
             this.FormClosing += SignUpForm_FormClosing;
             this.Controls.Add(lblNume);
             this.Controls.Add(txtNume);
@@ -43,12 +46,12 @@ namespace TechAssemblyManager.UI
         }
         private void SignUpForm_FormClosing(object sender, EventArgs e)
         {
-            if(mainForm != null && !mainForm.IsDisposed)
+            if (mainForm != null && !mainForm.IsDisposed)
             {
                 mainForm.Show();
             }
-        }   
-        private void BtnCreeazaCont_Click(object sender, EventArgs e)
+        }
+        private async Task BtnCreeazaCont_ClickAsync(object sender, EventArgs e)
         {
             string nume = txtNume.Text;
             string email = txtEmail.Text;
@@ -60,12 +63,30 @@ namespace TechAssemblyManager.UI
                 return;
             }
 
-            MainForm.User nouUser = new MainForm.User(nume, email);
-            UserManager.AddUser(nouUser, parola); // presupunem că UserManager gestionează parola
-            MessageBox.Show("Cont creat cu succes!");
+            bool isSignedUp = await userManagerBLL.RegisterUserAsync(
+                            emailTextBox.Text,
+                            passwordTextBox.Text,
+                            userNameTextBox.Text,
+                            firstNameTextBox.Text,
+                            lastNameTextBox.Text,
+                            addressTextBox.Text,
+                            phoneNumberTextBox.Text
+                        );
 
+            if (!isSignedUp)
+            {
+                MessageBox.Show("There was a problem at Sign Up!");
+                return;
+            }
+
+            // MainForm.User nouUser = new MainForm.User(nume, email);
+            // UserManager.AddUser(nouUser, parola); // presupunem că UserManager gestionează parola
+            MessageBox.Show("Cont creat cu succes!");
+            var user = await userManagerBLL.GetUserByUsernameAsync(userNameTextBox.Text);
+            SessionManager.LoggedInUser = user;
+            MessageBox.Show("Logare cu succes!");
             this.Hide();
-            new Logare(mainForm).Show();
+            // new Logare(mainForm).Show();
         }
     }
 }

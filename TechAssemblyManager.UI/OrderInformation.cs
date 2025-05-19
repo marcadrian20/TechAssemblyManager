@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using TechAssemblyManager.BLL;
 
 namespace TechAssemblyManager.UI
 {
@@ -15,6 +16,7 @@ namespace TechAssemblyManager.UI
         private System.Windows.Forms.Panel panelContainer;
         private MainForm _mainForm;
         private ProductViewerForm productViewerForm;
+        private ProductManagerBLL productManagerBLL;
         private FlowLayoutPanel infoPanel; // Adăugat pentru a reține panoul de informații
         private AccountForm _accountForm;
         public object Instance => this;
@@ -43,7 +45,7 @@ namespace TechAssemblyManager.UI
         }
         private void OrderInformation_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (_mainForm!=null && !_mainForm.IsDisposed)
+            if (_mainForm != null && !_mainForm.IsDisposed)
             {
                 _mainForm.Show();
             }
@@ -137,7 +139,7 @@ namespace TechAssemblyManager.UI
             };
             btnIesire.Click += (s, args) =>
             {
-                CartForm cartForm = new CartForm(_mainForm, productViewerForm);
+                CartForm cartForm = new CartForm(_mainForm, productManagerBLL, productViewerForm);
                 cartForm.Show();
                 this.Hide();
             };
@@ -191,7 +193,7 @@ namespace TechAssemblyManager.UI
 
         private void Account_Click(object sender, EventArgs e)
         {
-            AccountForm accountForm = new AccountForm(_mainForm, this,productViewerForm);
+            AccountForm accountForm = new AccountForm(_mainForm, this, productViewerForm, productManagerBLL);
             accountForm.ShowDialog();
             this.Hide();
         }

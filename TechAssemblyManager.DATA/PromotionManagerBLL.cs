@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TechAssemblyManager.BLL
 {
-    internal class PromotionManagerBLL
+    public class PromotionManagerBLL
     {
     }
 }

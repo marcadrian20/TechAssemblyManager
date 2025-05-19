@@ -10,7 +10,7 @@
         public string lastName { get; set; }
         public string passwordHash { get; set; }
         public string userName { get; set; }
-        public string userType { get; set; }
-        public Dictionary<string, SelectedProduct> selectedProducts { get; set; }
+        public string userType { get; set; }// "manager", "employee", "customer"
+        public Dictionary<string, SelectedProduct> selectedProducts { get; set; } = new Dictionary<string, SelectedProduct>();
     }
 }
