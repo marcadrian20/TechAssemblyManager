@@ -7,6 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using TechAssemblyManager.BLL;
+using TechAssemblyManager.Models;
 
 namespace TechAssemblyManager.UI
 {
@@ -16,13 +18,12 @@ namespace TechAssemblyManager.UI
         private Button btnAdaugaAngajat;
         private Button delete;
         public MainForm main;
+        public UserManagerBLL userManagerBLL;
         private ManagerForm Instance { get; set; }
 
         public ManagerForm()
         {
             InitializeComponent();
-            AppState.AdaugaAngajat(new JuniorAngajat("Ion Popescu", "ion.popescu@example.com"));
-            AppState.AdaugaAngajat(new SeniorAngajat("Maria Ionescu", "maria.ionescu@example.com"));
             this.main = main;
             Instance = this;
             this.Text = "Manager - Gestionare Angajați";
@@ -62,38 +63,38 @@ namespace TechAssemblyManager.UI
             this.main = main;
 
         }
-        private void IncarcaAngajati()
+        private async Task IncarcaAngajati()
         {
             listBox1.Items.Clear();
-            var angajati = AppState.GetAngajati();
-            if (angajati == null || angajati.Count == 0)
+            var angajati = await userManagerBLL.GetAllEmployeesAsync();
+            if (angajati == null)
             {
                 listBox1.Items.Add("Nu există angajați.");
                 return;
             }
             foreach (var angajat in angajati)
             {
-                Console.WriteLine($"Loaded employee: {angajat.Nume} ({angajat.Email})");
+                Console.WriteLine($"Loaded employee: {angajat.firstName} ({angajat.email})");
                 listBox1.Items.Add(angajat);
             }
         }
 
         private void BtnAdaugaAngajat_Click(object sender, EventArgs e)
         {
-            var form = new AdaugaAngajatForm();
+            var form = new AdaugaAngajatForm(userManagerBLL);
             form.FormClosed += (s, args) => IncarcaAngajati(); // Refresh the list after adding  
             form.ShowDialog();
         }
-        private void delete_Click(object sender, EventArgs e)
+        private async void delete_Click(object sender, EventArgs e)
         {
             if (listBox1.SelectedItem != null)
             {
-                var angajat = listBox1.SelectedItem as Angajat;
+                var angajat = listBox1.SelectedItem as User;
                 if (angajat != null)
                 {
-                    AppState.StergeAngajat(angajat);
+                    await userManagerBLL.DeleteUserAsync(angajat.userName);
                 }
-                IncarcaAngajati();
+                await IncarcaAngajati();
             }
         }
     }

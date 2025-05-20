@@ -4,20 +4,26 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using TechAssemblyManager.BLL;
+using TechAssemblyManager.DAL.FirebaseHelper;
+using TechAssemblyManager.Models;
 
 namespace TechAssemblyManager.UI
 {
     public partial class ProductViewerForm : Form
     {
         private MainForm mainForm;
-        public CartForm cartForm;
-        private List<Produs> toateProdusele = new List<Produs>();
-        private List<Produs> produseFiltrate = new List<Produs>();
-        private List<Produs> cosCumparaturi = new List<Produs>();
-        private Dictionary<Produs, int> ratinguri = new Dictionary<Produs, int>();
+        private ProductManagerBLL productManagerBLL;
+        private CartManagerBLL cartManagerBLL;
+        private UserManagerBLL userManagerBLL;
+        private OrderManagerBLL orderManagerBLL;
+
+        private List<Product> toateProdusele = new List<Product>();
+        private List<Product> produseFiltrate = new List<Product>();
+        private List<Product> cosCumparaturi = new List<Product>();
+        private Dictionary<Product, int> ratinguri = new Dictionary<Product, int>();
         private int produsePePagina = 10;
         private int paginaCurenta = 1;
-
+        private string categoryID;
         private FlowLayoutPanel flpProduse;
         private FlowLayoutPanel flpPaginare;
         private TextBox txtCautare;
@@ -26,43 +32,48 @@ namespace TechAssemblyManager.UI
         private Label lblCos;
         private ComboBox cmbCategorii;
         private Button btnAccount;
-        private object instance;
+        // private object instance;
         /// <summary>
         /// 
         /// </summary>
-        private readonly ProductManagerBLL productManagerBLL;
-        public ProductViewerForm Instance { get; set; }
+        // public ProductViewerForm Instance { get; set; }
 
-        public ProductViewerForm(MainForm mainForm, CartForm cartForm, ProductManagerBLL productManager, string categorieInitiala = null)
+        public ProductViewerForm(MainForm mainForm, ProductManagerBLL productManagerBLL, CartManagerBLL cartManagerBLL, UserManagerBLL userManagerBLL, OrderManagerBLL orderManagerBLL, string categoryID)
         {
             InitializeComponent();
             this.mainForm = mainForm;
-            this.cartForm = cartForm;
-            Instance = this;
+            this.productManagerBLL = productManagerBLL;
+            this.cartManagerBLL = cartManagerBLL;
+            this.userManagerBLL = userManagerBLL;
+            this.orderManagerBLL = orderManagerBLL;
+            // this.cartForm = cartForm;
+            // Instance = this;
+            this.categoryID = categoryID;
             this.Text = "Catalog Produse";
             this.Size = new Size(1000, 700);
             this.BackColor = Color.FromArgb(245, 245, 245);
             this.Font = new Font("Segoe UI", 10);
-            productManagerBLL = productManager;
             InitializeLayout();
-            LoadProduse();
+            LoadProduseAsync();
 
             cmbCategorii.SelectedIndexChanged -= cmbCategorii_SelectedIndexChanged;
             cmbCategorii.Items.Clear();
             string[] categorii = { "Toate", "Laptopuri", "Desktopuri", "Monitoare" };
             cmbCategorii.Items.AddRange(categorii);
 
-            if (!string.IsNullOrEmpty(categorieInitiala) && cmbCategorii.Items.Contains(categorieInitiala))
-                cmbCategorii.SelectedItem = categorieInitiala;
+            if (!string.IsNullOrEmpty(categoryID) && cmbCategorii.Items.Contains(categoryID))
+                cmbCategorii.SelectedItem = categoryID;
             else
                 cmbCategorii.SelectedIndex = 0;
 
-#pragma warning disable CS8622 // Nullability of reference types in type of parameter doesn't match the target delegate (possibly because of nullability attributes).
+            // #pragma warning disable CS8622 // Nullability of reference types in type of parameter doesn't match the target delegate (possibly because of nullability attributes).
             cmbCategorii.SelectedIndexChanged += cmbCategorii_SelectedIndexChanged;
-#pragma warning restore CS8622 // Nullability of reference types in type of parameter doesn't match the target delegate (possibly because of nullability attributes).
+            // #pragma warning restore CS8622 // Nullability of reference types in type of parameter doesn't match the target delegate (possibly because of nullability attributes).
             this.FormClosing += ProductViewerForm_FormClosing;
-            FiltreazaProduse();
-            AfiseazaPagina(1);
+            this.Load += ProductViewerForm_Load;
+
+            // FiltreazaProduse();
+            // AfiseazaPagina(1);
         }
         private void ProductViewerForm_FormClosing(object sender, FormClosingEventArgs e)
         {
@@ -71,17 +82,10 @@ namespace TechAssemblyManager.UI
                 mainForm.Show();
             }
         }
-        public ProductViewerForm(object instance)
-        {
-            InitializeComponent();
-            this.instance = instance;
 
-            // Ensure layout is initialized
-            InitializeLayout();
-        }
-
-        private void ProductViewerForm_Load(object sender, EventArgs e)
+        private async void ProductViewerForm_Load(object sender, EventArgs e)
         {
+            await LoadProduseAsync();
             FiltreazaProduse();
             AfiseazaPagina(1);
         }
@@ -92,7 +96,7 @@ namespace TechAssemblyManager.UI
 
         private void InitializeLayout()
         {
-            int offsetDreapta = 280; // cât să mutăm în dreapta
+            int offsetDreapta = 280;
 
             txtCautare = new TextBox { Width = 200, Left = 10 + offsetDreapta, Top = 10 };
             btnCauta = new Button
@@ -133,20 +137,24 @@ namespace TechAssemblyManager.UI
                 BackColor = Color.Transparent
             };
             this.Controls.Add(flpProduse);
+
             Button btnReincarca = new Button
             {
                 Text = "Reîncarcă Produse",
-                Location = new Point(500, 10), // Adaptează locația butonului
+                Location = new Point(500, 10),
                 Width = 120,
                 BackColor = Color.FromArgb(52, 152, 219),
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat
             };
-            btnReincarca.Click += (s, e) =>
+            btnReincarca.Click += async (s, e) =>
             {
-                ReincarcaProduse(); // Apelăm funcția de reîncărcare
+                await LoadProduseAsync();
+                FiltreazaProduse();
+                AfiseazaPagina(1);
             };
             this.Controls.Add(btnReincarca);
+
             flpPaginare = new FlowLayoutPanel
             {
                 Location = new Point(10 + offsetDreapta, 610),
@@ -154,6 +162,7 @@ namespace TechAssemblyManager.UI
                 FlowDirection = FlowDirection.LeftToRight
             };
             this.Controls.Add(flpPaginare);
+
             lblPagina = new Label
             {
                 Location = new Point(580 + offsetDreapta, 655),
@@ -161,21 +170,6 @@ namespace TechAssemblyManager.UI
                 Font = new Font("Segoe UI", 9, FontStyle.Italic)
             };
             this.Controls.Add(lblPagina);
-
-            lblCos = new Label
-            {
-                Text = "Coș cumpărături",
-                Location = new Point(730 + offsetDreapta, 10),
-                Font = new Font("Segoe UI", 10, FontStyle.Bold),
-                AutoSize = true
-            };
-            lstCos = new ListBox
-            {
-                Location = new Point(730 + offsetDreapta, 40),
-                Size = new Size(240, 500)
-            };
-            this.Controls.Add(lblCos);
-            this.Controls.Add(lstCos);
 
             btnAccount = new Button
             {
@@ -185,72 +179,11 @@ namespace TechAssemblyManager.UI
             };
             btnAccount.Click += Account_Click;
             this.Controls.Add(btnAccount);
-
-            this.Load += ProductViewerForm_Load;
         }
 
-        private void LoadProduse()
+        private async Task LoadProduseAsync()
         {
-            string[] categorii = { "Toate", "Laptopuri", "Desktopuri", "Monitoare", "Procesor", "Placa Video", "Placa de Baza", "RAM", "SSD", "HDD", "Sursa", "Carcasa", "Imprimante", "Mouse", "Tastatura" };
-            cmbCategorii.Items.Clear();
-            cmbCategorii.Items.AddRange(categorii);
-            cmbCategorii.SelectedIndex = 0;
-
-            Random rand = new Random();
-
-            for (int i = 1; i <= 100; i++)
-            {
-                string categorieRandom = categorii[rand.Next(1, categorii.Length)];
-                var produs = new Produs
-                {
-                    Nume = $"{categorieRandom} {i}",
-                    Pret = 100 + rand.Next(0, 5000),
-                    Imagine = Properties.Resources.gaming_zmeu_max_amd_ryzen_3_3200g_36ghz_16gb_ddr4_1tb_ssd_amd_radeon_vega_8_iluminare_rgb_5aa76ce87e4c16367530ff2aa7414470,
-                    Categorie = categorieRandom
-                };
-
-                toateProdusele.Add(produs);
-                ratinguri[produs] = rand.Next(1, 6);
-            }
-            for (int i = 1; i <= 20; i++)
-            {
-                var produs = new Produs
-                {
-                    Nume = $"Imprimantă HP LaserJet M110we {i}",
-                    Pret = 499,
-                    Imagine = (Image)Image.FromStream(new MemoryStream(Properties.Resources.mouse)).Clone(),
-
-                    Categorie = "Imprimante"
-                };
-                toateProdusele.Add(produs);
-                ratinguri[produs] = rand.Next(1, 6);
-            }
-
-            for (int i = 1; i <= 20; i++)
-            {
-                var produs = new Produs
-                {
-                    Nume = $"Mouse Logitech G502 {i}",
-                    Pret = 249,
-                    Imagine = (Image)Image.FromStream(new MemoryStream(Properties.Resources.imprimanta)).Clone(),
-                    Categorie = "Mouse"
-                };
-                toateProdusele.Add(produs);
-                ratinguri[produs] = rand.Next(1, 6);
-            }
-
-            for (int i = 1; i <= 20; i++)
-            {
-                var produs = new Produs
-                {
-                    Nume = $"Tastatură Redragon K552 {i}",
-                    Pret = 199,
-                    Imagine = (Image)Image.FromStream(new MemoryStream(Properties.Resources.tastatura)).Clone(),
-                    Categorie = "Tastatura"
-                };
-                toateProdusele.Add(produs);
-                ratinguri[produs] = rand.Next(1, 6);
-            }
+            toateProdusele = await productManagerBLL.GetProductsByCategoryAsync(categoryID);
         }
         private void cmbCategorii_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -261,18 +194,18 @@ namespace TechAssemblyManager.UI
 
         private void FiltreazaProduse()
         {
-            if (txtCautare == null || cmbCategorii == null)
-            {
-                MessageBox.Show("Controls are not initialized yet.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
+            // if (txtCautare == null || cmbCategorii == null)
+            // {
+            //     MessageBox.Show("Controls are not initialized yet.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            //     return;
+            // }
             string cautare = txtCautare.Text.ToLower();
             string categorieSelectata = cmbCategorii.SelectedItem?.ToString() ?? "Toate";
 
             produseFiltrate = toateProdusele
                 .Where(p =>
-                    p.Nume.ToLower().Contains(cautare) &&
-                    (categorieSelectata == "Toate" || p.Categorie == categorieSelectata))
+                    p.name.ToLower().Contains(cautare) &&
+                    (categorieSelectata == "Toate" || p.categoryId == categorieSelectata))
                 .ToList();
         }
 
@@ -281,12 +214,12 @@ namespace TechAssemblyManager.UI
             AfiseazaPagina(pagina, produseFiltrate);
         }
 
-        private void AfiseazaPagina(int pagina, List<Produs> listaProduse)
+        private void AfiseazaPagina(int pagina, List<Product> listaProduse)
         {
-            if (flpProduse == null)
-            {
-                throw new InvalidOperationException("flpProduse is not initialized. Ensure InitializeLayout() is called before using this method.");
-            }
+            // if (flpProduse == null)
+            // {
+            //     throw new InvalidOperationException("flpProduse is not initialized. Ensure InitializeLayout() is called before using this method.");
+            // }
             flpProduse.Controls.Clear();
             int start = (pagina - 1) * produsePePagina;
             int end = Math.Min(start + produsePePagina, listaProduse.Count);
@@ -303,7 +236,7 @@ namespace TechAssemblyManager.UI
             lblPagina.Text = $"Pagina {pagina} din {totalPagini}";
         }
 
-        private Panel CreeazaCardProdus(Produs produs)
+        private Panel CreeazaCardProdus(Product produs)
         {
             Panel p = new Panel
             {
@@ -313,27 +246,27 @@ namespace TechAssemblyManager.UI
                 Margin = new Padding(10)
             };
 
-            PictureBox pic = new PictureBox
-            {
-                Image = produs.Imagine,
-                SizeMode = PictureBoxSizeMode.Zoom,
-                Width = 140,
-                Height = 100,
-                Top = 5,
-                Left = 10
-            };
+            // PictureBox pic = new PictureBox
+            // {
+            //     Image = produs.Imagine,
+            //     SizeMode = PictureBoxSizeMode.Zoom,
+            //     Width = 140,
+            //     Height = 100,
+            //     Top = 5,
+            //     Left = 10
+            // };
 
-            Label lblNume = new Label
+            Label lblname = new Label
             {
-                Text = produs.Nume,
+                Text = produs.name,
                 Top = 110,
                 Width = 140,
                 Left = 10
             };
 
-            Label lblPret = new Label
+            Label lblprice = new Label
             {
-                Text = $"Pret: {produs.Pret} RON",
+                Text = $"price: {produs.price} RON",
                 Top = 130,
                 Width = 140,
                 Left = 10
@@ -347,34 +280,34 @@ namespace TechAssemblyManager.UI
                 Left = 10
             };
 
-            btn.Click += (s, e) =>
+            btn.Click += async (s, e) =>
             {
-                if (!AppState.EsteLogat)
+                if (SessionManager.LoggedInUser == null)
                 {
                     MessageBox.Show("Trebuie să fii logat pentru a adăuga produse în coș.", "Autentificare necesară", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    Logare logareForm = new Logare(mainForm);
+                    Logare logareForm = new Logare(mainForm,userManagerBLL);
                     logareForm.ShowDialog();
                     this.Hide();
                     return;
                 }
-                lstCos.Items.Add($"{produs.Nume} - {produs.Pret} RON");
+                lstCos.Items.Add($"{produs.name} - {produs.price} RON");
 
-                if (!cosCumparaturi.Contains(produs))
-                    cosCumparaturi.Add(produs);
-
-                if (cartForm == null || cartForm.IsDisposed)
-                {
-                    cartForm = new CartForm(mainForm, productManagerBLL, this);
-                    cartForm.Show();
-                }
-                else if (!cartForm.Visible)
-                {
-                    cartForm.Show();
-                }
-
-                cartForm.BringToFront();
-                cartForm.AdaugaProdusInListBox(produs);
+                await cartManagerBLL.AddProductToCartAsync(SessionManager.LoggedInUser.userName, produs.productId, 1);
+                MessageBox.Show($"{produs.name} a fost adăugat în coș!", "Succes", MessageBoxButtons.OK, MessageBoxIcon.Information);
             };
+            // if (cartForm == null || cartForm.IsDisposed)
+            // {
+            //     cartForm = new CartForm(mainForm, productManagerBLL, userManagerBLL, this);
+            //     cartForm.Show();
+            // }
+            // else if (!cartForm.Visible)
+            // {
+            //     cartForm.Show();
+            // }
+
+            // cartForm.BringToFront();
+            // cartForm.AdaugaProdusInListBox(produs);
+
 
             Label lblRating = new Label
             {
@@ -410,9 +343,9 @@ namespace TechAssemblyManager.UI
                 ratinguri[produs] = ratingAles;
             };
 
-            p.Controls.Add(pic);
-            p.Controls.Add(lblNume);
-            p.Controls.Add(lblPret);
+            //p.Controls.Add(pic);
+            p.Controls.Add(lblname);
+            p.Controls.Add(lblprice);
             p.Controls.Add(btn);
             p.Controls.Add(lblRating);
             p.Controls.Add(cmbRating);
@@ -440,7 +373,7 @@ namespace TechAssemblyManager.UI
 
 
 
-        private void GenereazaButoanePaginare(List<Produs> listaProduse)
+        private void GenereazaButoanePaginare(List<Product> listaProduse)
         {
             flpPaginare.Controls.Clear();
             int totalPagini = (int)Math.Ceiling(listaProduse.Count / (double)produsePePagina);
@@ -467,9 +400,10 @@ namespace TechAssemblyManager.UI
         public void btnVeziCos_Click(object sender, EventArgs e)
         {
 
-            CheckoutForm cf = new CheckoutForm(cosCumparaturi);
-
-            cf.ShowDialog();
+            var cartForm = new CartForm(mainForm, cartManagerBLL, userManagerBLL, productManagerBLL, orderManagerBLL);
+            cartForm.Show();
+            cartForm.BringToFront();
+            this.Hide();
 
             /*CartForm cartForm = new CartForm(this, mainForm);
 
@@ -482,7 +416,7 @@ namespace TechAssemblyManager.UI
 
         private void Account_Click(object sender, EventArgs e)
         {
-            AccountForm accForm = new AccountForm(mainForm, this, this.Instance, productManagerBLL);
+            AccountForm accForm = new AccountForm(mainForm, productManagerBLL, userManagerBLL, orderManagerBLL);
             accForm.ShowDialog();
             this.Hide();
         }
@@ -492,41 +426,41 @@ namespace TechAssemblyManager.UI
             mainForm.Show();
             this.Close();
         }
-        public void AdaugaProdus(Produs produs)
-        {
-            if (!toateProdusele.Contains(produs))
-            {
-                toateProdusele.Add(produs); // Adăugăm produsul la lista globală
-            }
-            // Adăugăm produsul la coșul de cumpărături
+        // public void AdaugaProdus(Produs produs)
+        // {
+        //     if (!toateProdusele.Contains(produs))
+        //     {
+        //         toateProdusele.Add(produs); // Adăugăm produsul la lista globală
+        //     }
+        //     // Adăugăm produsul la coșul de cumpărături
 
-            // Reset filters to ensure the new product is visible
-            cmbCategorii.SelectedItem = "Toate"; // Reset category filter to "Toate"
-            txtCautare.Text = ""; // Clear the search text
+        //     // Reset filters to ensure the new product is visible
+        //     cmbCategorii.SelectedItem = "Toate"; // Reset category filter to "Toate"
+        //     txtCautare.Text = ""; // Clear the search text
 
-            // Refresh the filtered list and UI
-            FiltreazaProduse();
-            AfiseazaPagina(1);
+        //     // Refresh the filtered list and UI
+        //     FiltreazaProduse();
+        //     AfiseazaPagina(1);
 
-            // Provide feedback to the user
-            MessageBox.Show($"Produsul '{produs.Nume}' a fost adăugat cu succes!", "Produs Adăugat", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
+        //     // Provide feedback to the user
+        //     MessageBox.Show($"Produsul '{produs.name}' a fost adăugat cu succes!", "Produs Adăugat", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        // }
 
-        private void button13_Click(object sender, EventArgs e)
-        {
-            if (cartForm == null)
-            {
-                cartForm = new CartForm(this.mainForm, productManagerBLL, this);
-            }
+        // private void button13_Click(object sender, EventArgs e)
+        // {
+        //     if (cartForm == null)
+        //     {
+        //         cartForm = new CartForm(this.mainForm, productManagerBLL, userManagerBLL, this);
+        //     }
 
-            cartForm.SetProduse(AppState.GetProduse());
+        //     cartForm.SetProduse(AppState.GetProduse());
 
-            cartForm.Show();
-            cartForm.BringToFront();
-            this.Hide();
+        //     cartForm.Show();
+        //     cartForm.BringToFront();
+        //     this.Hide();
 
 
-        }
+        // }
         private void button2_Click(object sender, EventArgs e)
         {
             MainForm mainForm = new MainForm();
@@ -534,17 +468,17 @@ namespace TechAssemblyManager.UI
             this.Hide();
         }
 
-        public List<Produs> GetProduse()
-        {
-            return lstCos.Items
-                .Cast<string>()
-                .Select(item => new Produs
-                {
-                    Nume = item.Split('-')[0].Trim(),
-                    Pret = decimal.Parse(item.Split('-')[1].Trim().Replace("RON", ""))
-                })
-                .ToList();
-        }
+        // public List<Produs> GetProduse()
+        // {
+        //     return lstCos.Items
+        //         .Cast<string>()
+        //         .Select(item => new Produs
+        //         {
+        //             name = item.Split('-')[0].Trim(),
+        //             price = decimal.Parse(item.Split('-')[1].Trim().Replace("RON", ""))
+        //         })
+        //         .ToList();
+        // }
 
         private void Filtre_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -562,30 +496,30 @@ namespace TechAssemblyManager.UI
             paginaCurenta = 1;
             AfiseazaPagina(paginaCurenta, produseCuRating);
         }
-        public void ReincarcaProduse()
-        {
-            var produseNoi = AppState.GetProduse(); // Obține produsele noi
+        // public void ReincarcaProduse()
+        // {
+        //     var produseNoi = AppState.GetProduse(); // Obține produsele noi
 
-            // Adăugăm produsele noi dacă nu sunt deja în lista globală
-            foreach (var produs in produseNoi)
-            {
-                if (!toateProdusele.Any(p => p.Nume == produs.Nume && p.Pret == produs.Pret))
-                {
-                    toateProdusele.Add(produs);
-                }
-            }
+        //     // Adăugăm produsele noi dacă nu sunt deja în lista globală
+        //     foreach (var produs in produseNoi)
+        //     {
+        //         if (!toateProdusele.Any(p => p.name == produs.name && p.price == produs.price))
+        //         {
+        //             toateProdusele.Add(produs);
+        //         }
+        //     }
 
-            // Resetăm filtrele și afișăm produsele din nou
-            cmbCategorii.SelectedItem = "Toate";
-            txtCautare.Text = "";
+        //     // Resetăm filtrele și afișăm produsele din nou
+        //     cmbCategorii.SelectedItem = "Toate";
+        //     txtCautare.Text = "";
 
-            FiltreazaProduse(); // Filtrăm din nou lista de produse
+        //     FiltreazaProduse(); // Filtrăm din nou lista de produse
 
-        }
-        public List<Produs> GetProduseSelectate()
-        {
-            // Înlocuiește cu logica reală de selectare dacă ai UI
-            return AppState.GetProduse(); // sau lista locală de produse
-        }
+        // }
+        // public List<Produs> GetProduseSelectate()
+        // {
+        //     // Înlocuiește cu logica reală de selectare dacă ai UI
+        //     return AppState.GetProduse(); // sau lista locală de produse
+        // }
     }
 }

@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
+using TechAssemblyManager.BLL;
+using TechAssemblyManager.Models;
 
 namespace TechAssemblyManager.UI
 {
@@ -10,9 +12,15 @@ namespace TechAssemblyManager.UI
         private ListView listView;
         private Button btnUpdateStatus;
         private MainForm mainForm;
-        public ServiceRequestsForm(MainForm mainForm)
+        private OrderManagerBLL orderManagerBLL;
+        private User currentUser;
+        private List<ServiceRequest> serviceRequests = new();
+
+        public ServiceRequestsForm(MainForm mainForm, OrderManagerBLL orderManagerBLL, User currentUser)
         {
             this.mainForm = mainForm;
+            this.orderManagerBLL = orderManagerBLL;
+            this.currentUser = currentUser;
             this.Text = "Istoric Cereri Service";
             this.Size = new Size(600, 400);
 
@@ -41,30 +49,32 @@ namespace TechAssemblyManager.UI
             Controls.Add(listView);
             Controls.Add(btnUpdateStatus);
 
-            LoadCereri();
+            _ = LoadCereriAsync();
         }
-        private void ServiceRequestsForm_FormClosing(object sender, EventArgs e)
+
+        private void ServiceRequestsForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if(mainForm != null && !mainForm.IsDisposed)
+            if (mainForm != null && !mainForm.IsDisposed)
             {
                 mainForm.Show();
             }
         }
-        private void LoadCereri()
+
+        private async Task LoadCereriAsync()
         {
             listView.Items.Clear();
-            var cereri = AppState.GetCereriService();
+            serviceRequests = await orderManagerBLL.GetAllServiceRequestsAsync();
 
-            foreach (var cerere in cereri)
+            foreach (var cerere in serviceRequests)
             {
-                var item = new ListViewItem(cerere.DataProgramare.ToShortDateString());
-                item.SubItems.Add(cerere.Descriere);
+                var item = new ListViewItem(cerere.RequestDate.ToShortDateString());
+                item.SubItems.Add(cerere.ProblemDescription);
                 item.SubItems.Add(cerere.Status);
                 listView.Items.Add(item);
             }
         }
 
-        private void BtnUpdateStatus_Click(object sender, EventArgs e)
+        private async void BtnUpdateStatus_Click(object sender, EventArgs e)
         {
             if (listView.SelectedItems.Count == 0)
             {
@@ -74,15 +84,21 @@ namespace TechAssemblyManager.UI
 
             var item = listView.SelectedItems[0];
             var descriere = item.SubItems[1].Text;
-
-            var cereri = AppState.GetCereriService();
-            var cerere = cereri.Find(c => c.Descriere == descriere);
+            var cerere = serviceRequests.Find(c => c.ProblemDescription == descriere);
 
             if (cerere != null)
             {
                 var statusNou = Prompt.ShowDialog("Introduceți noul status:", "Actualizează Status");
-                cerere.Status = statusNou;
-                LoadCereri();
+                bool result = await orderManagerBLL.UpdateServiceRequestStatusAsync(cerere.ServiceRequestId, statusNou, currentUser);
+                if (result)
+                {
+                    MessageBox.Show("Status actualizat!");
+                    await LoadCereriAsync();
+                }
+                else
+                {
+                    MessageBox.Show("Eroare la actualizare.");
+                }
             }
         }
 

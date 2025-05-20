@@ -7,10 +7,10 @@
         private System.Windows.Forms.Label lblUser;
         private System.Windows.Forms.TextBox txtUser;
         private System.Windows.Forms.Label lblDescriere;
-        private System.Windows.Forms.TextBox txtDescriere;
+        //private System.Windows.Forms.TextBox txtDescriere;
         private System.Windows.Forms.Label lblData;
         private System.Windows.Forms.DateTimePicker datePicker;
-        private System.Windows.Forms.Button btnTrimite;
+        //private System.Windows.Forms.Button btnTrimite;
 
         protected override void Dispose(bool disposing)
         {

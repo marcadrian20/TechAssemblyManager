@@ -75,7 +75,7 @@
             button13.TabIndex = 14;
             button13.Text = "Adauga in cos";
             button13.UseVisualStyleBackColor = true;
-            button13.Click += button13_Click;
+            //button13.Click += button13_Click;
             // 
             // SiglaMainForm
             // 

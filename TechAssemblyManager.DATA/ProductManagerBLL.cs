@@ -10,13 +10,17 @@ namespace TechAssemblyManager.BLL
 {
     public class ProductManagerBLL
     {
-        private readonly FirebaseHelper _firebaseHelper;
+        private FirebaseHelper _firebaseHelper;
 
         public ProductManagerBLL(FirebaseHelper firebaseHelper)
         {
             _firebaseHelper = firebaseHelper;
         }
 
+        public async Task<List<Product>> GetAllActiveProductsAsync()
+        {
+            return await _firebaseHelper.GetAllActiveProductsAsync();
+        }
         public async Task<bool> AddProductAsync(Product product, User currentUser)
         {
             if (string.IsNullOrWhiteSpace(product.productId) ||  ///Validation whether there's a valid category
@@ -90,7 +94,35 @@ namespace TechAssemblyManager.BLL
             }
         }
 
+        public async Task<bool> UpdateProductAsync(Product product, User currentUser)
+        {
+            if (currentUser == null || currentUser.userType != "employee" || !currentUser.employeeData.isSenior)
+                return false;
+            if (product == null || string.IsNullOrWhiteSpace(product.productId))
+                return false;
 
+            // Optionally: validate fields (price > 0, rating <= 5, etc.)
+            await _firebaseHelper.UpdateAsync($"Products/{product.productId}", product);
+            return true;
+        }
+
+        public async Task<bool> DeleteProductAsync(string productId, User currentUser)
+        {
+            if (currentUser == null || currentUser.userType != "employee" || !currentUser.employeeData.isSenior)
+                return false;
+            if (string.IsNullOrWhiteSpace(productId))
+                return false;
+
+            await _firebaseHelper.DeleteAsync($"Products/{productId}");
+            return true;
+        }
+
+        public async Task<Product?> GetProductByIdAsync(string productId)
+        {
+            if (string.IsNullOrWhiteSpace(productId))
+                return null;
+            return await _firebaseHelper.GetAsync<Product>($"Products/{productId}");
+        }
         // public async Task<bool> AddProductToCart(string productId, int quantity)
         // {
         //     var selectedProduct = new SelectedProduct

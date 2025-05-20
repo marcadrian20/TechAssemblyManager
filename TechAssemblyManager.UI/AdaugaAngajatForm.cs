@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
+using TechAssemblyManager.BLL;
+using TechAssemblyManager.Models;
 
 namespace TechAssemblyManager.UI
 {
@@ -8,10 +10,12 @@ namespace TechAssemblyManager.UI
         private TextBox txtNume, txtEmail;
         private ComboBox cmbTipAngajat;
         private Button btnSalveaza;
-        private TextBox tipcont;
-        public AdaugaAngajatForm()
+        private UserManagerBLL userManagerBLL;
+
+        public AdaugaAngajatForm(UserManagerBLL userManagerBLL)
         {
             InitializeComponent();
+            this.userManagerBLL = userManagerBLL;
             this.Text = "Adaugă Angajat";
             this.Size = new System.Drawing.Size(300, 300);
 
@@ -46,7 +50,7 @@ namespace TechAssemblyManager.UI
             this.Controls.Add(btnSalveaza);
         }
 
-        private void BtnSalveaza_Click(object sender, EventArgs e)
+        private async void BtnSalveaza_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(txtNume.Text) || string.IsNullOrWhiteSpace(txtEmail.Text) || cmbTipAngajat.SelectedItem == null)
             {
@@ -54,56 +58,30 @@ namespace TechAssemblyManager.UI
                 return;
             }
 
-            Angajat angajat;
-            if (cmbTipAngajat.SelectedItem.ToString() == "Junior")
+            var user = new User
             {
-                angajat = new JuniorAngajat(txtNume.Text, txtEmail.Text);
+                userName = txtNume.Text.Trim().Replace(" ", "").ToLower(),
+                email = txtEmail.Text.Trim(),
+                userType = "employee",
+                employeeData = new EmployeeData
+                {
+                    isSenior = cmbTipAngajat.SelectedItem.ToString() == "Senior"
+                }
+            };
+
+            // You may want to prompt for a password or generate one
+            string password = "defaultPassword123"; // Replace with real logic
+
+            bool result = await userManagerBLL.RegisterUserAsync(user, password);
+            if (result)
+            {
+                MessageBox.Show("Angajat adăugat cu succes!");
+                this.Close();
             }
             else
             {
-                angajat = new SeniorAngajat(txtNume.Text, txtEmail.Text);
+                MessageBox.Show("Eroare: utilizatorul există deja sau date invalide.");
             }
-
-            AppState.AdaugaAngajat(angajat);
-            Console.WriteLine($"Added employee: {angajat.Nume} ({angajat.Email})");
-            MessageBox.Show("Angajat adăugat cu succes!");
-            this.Close();
-        }
-    }
-
-    // Concrete classes for Angajat
-    public class JuniorAngajat : Angajat
-    {
-        public JuniorAngajat(string nume, string email) : base(nume, email)
-        {
-        }
-
-        public override void OnoreazaComanda(Comanda comanda)
-        {
-            // Implementation for JuniorAngajat
-        }
-
-        public override void ActualizeazaStatusService(CerereService cerere, string statusNou)
-        {
-            // Implementation for JuniorAngajat
-        }
-    }
-
-    public class SeniorAngajat : Angajat
-    {
-        public SeniorAngajat(string nume, string email) : base(nume, email) // Call the base constructor
-        {
-
-        }
-
-        public override void OnoreazaComanda(Comanda comanda)
-        {
-            // Implementation for SeniorAngajat
-        }
-
-        public override void ActualizeazaStatusService(CerereService cerere, string statusNou)
-        {
-            // Implementation for SeniorAngajat
         }
     }
 }

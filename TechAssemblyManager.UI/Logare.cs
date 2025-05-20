@@ -16,9 +16,11 @@ namespace TechAssemblyManager.UI
         private Label lblParola;
         private MainForm mainForm;
         private UserManagerBLL userManagerBLL;
-        public Logare(MainForm mainForm)
+        public Logare(MainForm mainForm, UserManagerBLL userManagerBLL)
         {
+            InitializeComponent();
             this.mainForm = mainForm;
+            this.userManagerBLL = userManagerBLL;
             this.Text = "Autentificare";
             this.Size = new Size(300, 250);
             this.StartPosition = FormStartPosition.CenterScreen;

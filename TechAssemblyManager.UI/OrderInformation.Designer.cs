@@ -39,7 +39,7 @@
             Trimitere.TabIndex = 1;
             Trimitere.Text = "Trimitere comanda";
             Trimitere.UseVisualStyleBackColor = true;
-            Trimitere.Click += Trimitere_Click;
+            //Trimitere.Click += Trimitere_Click;
             // 
             // Account
             // 
@@ -49,7 +49,7 @@
             Account.TabIndex = 2;
             Account.Text = "Account";
             Account.UseVisualStyleBackColor = true;
-            Account.Click += Account_Click;
+            //Account.Click += Account_Click;
             // 
             // OrderInformation
             // 

@@ -6,6 +6,7 @@ using System.Windows.Forms;
 using FirebaseWrapper;
 using TechAssemblyManager.Models;
 using TechAssemblyManager.BLL;
+using TechAssemblyManager.DAL.FirebaseHelper;
 
 namespace TechAssemblyManager.UI
 {
@@ -32,6 +33,7 @@ namespace TechAssemblyManager.UI
         private ProductManagerBLL productManagerBLL;
         private UserManagerBLL userManagerBLL;
         private OrderManagerBLL orderManagerBLL;
+        private CartManagerBLL cartManagerBLL;
         private PromotionManagerBLL promotionManagerBLL;
 
         /// ////
@@ -45,14 +47,15 @@ namespace TechAssemblyManager.UI
             );
             productManagerBLL = new ProductManagerBLL(firebaseHelper);
             userManagerBLL = new UserManagerBLL(firebaseHelper);
-            orderManagerBLL = new OrderManagerBLL(); // Implement as needed
-            promotionManagerBLL = new PromotionManagerBLL(); // Implement as needed
+            orderManagerBLL = new OrderManagerBLL(firebaseHelper);
+            promotionManagerBLL = new PromotionManagerBLL(firebaseHelper);
+            cartManagerBLL = new CartManagerBLL(firebaseHelper);
 
 
             ////ANALYZE DOWN BELOW
             this.KeyPreview = true;
             Instance = this;
-            prvf = new ProductViewerForm(this, null, productManagerBLL, null);
+            // prvf = new ProductViewerForm(this, null, productManagerBLL, null);
             if (Login == null)
             {
                 Login = new Button()
@@ -88,11 +91,11 @@ namespace TechAssemblyManager.UI
             Instance = this;
 
         }
-        public MainForm(MainForm instance = null)
-        {
-            Instance = instance ?? this; // Ensure Instance is never null
-            InitializeComponent();
-        }
+        // public MainForm(MainForm instance = null)
+        // {
+        //     Instance = instance ?? this; // Ensure Instance is never null
+        //     InitializeComponent();
+        // }
 
         //DEBUG
         private void MainForm_KeyDown(object sender, KeyEventArgs e)
@@ -106,7 +109,7 @@ namespace TechAssemblyManager.UI
         //END DEBUG
         private void ViewCatalog_Click(object sender, EventArgs e)
         {
-            CatalogProduse c = new CatalogProduse(this.Instance);
+            CatalogProduse c = new CatalogProduse(this.Instance, productManagerBLL, userManagerBLL, cartManagerBLL, orderManagerBLL);
             c.Show();
             this.Hide();
         }
@@ -119,100 +122,60 @@ namespace TechAssemblyManager.UI
         }
         private void BtnIstoricService_Click(object sender, EventArgs e)
         {
-            VizualizareCereriForm vizualizareCereriForm = new VizualizareCereriForm(AppState.UtilizatorCurent, this); // Transmite instanța curentă
+            VizualizareCereriForm vizualizareCereriForm = new VizualizareCereriForm(SessionManager.LoggedInUser, this, orderManagerBLL); // Transmite instanța curentă
             vizualizareCereriForm.Show();
             this.Hide();
         }
         private void Myaccount_Click(object sender, EventArgs e)
         {
-            var productViewerForm = new ProductViewerForm(this, cartForm, productManagerBLL, null); // Pass the current MainForm and CartForm
-            var accountForm = new AccountForm(this, this, productViewerForm, productManagerBLL); // Pass MainForm, current form, and ProductViewerForm
+            // var productViewerForm = new ProductViewerForm(this, productManagerBLL, null); // Pass the current MainForm and CartForm
+            var accountForm = new AccountForm(this, productManagerBLL, userManagerBLL, orderManagerBLL); // Pass MainForm, current form, and ProductViewerForm
             accountForm.Show();
             this.Hide(); //
         }
 
-        public void AddProdusToCos(Produs produs)
-        {
-            AppState.AdaugaProdus(produs);
-        }
-        private void AfiseazaComenzi(User user)
-        {
-            lstComenzi.Items.Clear();
+        // public void AddProdusToCos(Product produs)
+        // {
+        //     AppState.AdaugaProdus(produs);
+        // }
+        // private void AfiseazaComenzi(User user)
+        // {
+        //     lstComenzi.Items.Clear();
 
-            foreach (var comanda in user.Comenzi)
-            {
-                lstComenzi.Items.Add($"Comanda din {comanda.DataComenzii.ToShortDateString()} - {comanda.Produse.Count} produse");
-            }
-        }
+        //     foreach (var comanda in user.Comenzi)
+        //     {
+        //         lstComenzi.Items.Add($"Comanda din {comanda.DataComenzii.ToShortDateString()} - {comanda.Produse.Count} produse");
+        //     }
+        // }
         private void cos_Click(object sender, EventArgs e)
         {
             if (cartForm == null)
             {
-                cartForm = new CartForm(this, productManagerBLL, prvf);
+                cartForm = new CartForm(this, cartManagerBLL, userManagerBLL, productManagerBLL, orderManagerBLL);
             }
-
-            cartForm.SetProduse(AppState.GetProduse());
-
             cartForm.Show();
             cartForm.BringToFront();
             this.Hide();
         }
 
-        public void AcceseazaProduseDinCos()
-        {
-            if (cartForm != null)
-            {
-                List<Produs> produse = cartForm.GetProduse();
-                foreach (var produs in produse)
-                {
-                    Console.WriteLine($"Produs: {produs.Nume}, Preț: {produs.Pret}");
-                }
-            }
-        }
 
-        private void Searchbar_TextChanged(object sender, EventArgs e) { }
-        private void TechAssemblyManager_Enter(object sender, EventArgs e) { }
+        // private void Searchbar_TextChanged(object sender, EventArgs e) { }
+        // private void TechAssemblyManager_Enter(object sender, EventArgs e) { }
+
+        //
+        //##TODO LOOK AT THIS FORM
+        //
         private void CerereService_Click(object sender, EventArgs e)
         {
-            CerereServiceForm cerereForm = new CerereServiceForm(this.Instance);
+            CerereServiceForm cerereForm = new CerereServiceForm(this.Instance,orderManagerBLL,SessionManager.LoggedInUser);
             cerereForm.ShowDialog();
         }
 
         public MainForm Instance { get; }
-        // public class User
-        // {
-        //     public string Nume { get; set; }
-        //     public string Email { get; set; }
-        //     public List<Comanda> Comenzi { get; set; }
-        //     public bool EsteAutentificat { get; set; }
-        //     public OrderData DateLivrare { get; set; }
-
-        //     private string parola;
-
-        //     public User(string nume, string email)
-        //     {
-        //         Nume = nume;
-        //         Email = email;
-        //         Comenzi = new List<Comanda>();
-        //         parola = "admin123";
-        //         EsteAutentificat = false;
-
-        //     }
-
-        //     public bool Autentifica(string parolaIntrodusa)
-        //     {
-        //         if (parolaIntrodusa == parola)
-        //         {
-        //             EsteAutentificat = true;
-        //             return true;
-        //         }
-        //         return false;
-        //     }
-        // }
 
         private async void Login_Click(object sender, EventArgs e)
         {
-            Logare logare = new Logare(this.Instance);
+            Logare logare = new Logare(this.Instance,userManagerBLL);
             logare.Show();
             this.Hide();
         }

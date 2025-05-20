@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
+using TechAssemblyManager.Models;
 
 namespace TechAssemblyManager.UI
 {
     public partial class EcranInfo : Form
     {
-        private Produs produs;
+        private Product produs;
         private MainForm mainForm;
-        public EcranInfo(Produs produs)
+        public EcranInfo(Product produs)
         {
             mainForm=new MainForm();
             InitializeComponent();
@@ -32,18 +33,18 @@ namespace TechAssemblyManager.UI
             Font fontTitlu = new Font("Segoe UI", 14, FontStyle.Bold);
             Font fontText = new Font("Segoe UI", 11);
 
-            PictureBox pic = new PictureBox
-            {
-                Image = produs.Imagine,
-                SizeMode = PictureBoxSizeMode.Zoom,
-                Size = new Size(300, 250),
-                Location = new Point(50, 30),
-                BorderStyle = BorderStyle.FixedSingle
-            };
+            // PictureBox pic = new PictureBox
+            // {
+            //     Image = produs.Imagine,
+            //     SizeMode = PictureBoxSizeMode.Zoom,
+            //     Size = new Size(300, 250),
+            //     Location = new Point(50, 30),
+            //     BorderStyle = BorderStyle.FixedSingle
+            // };
 
-            Label lblNume = new Label
+            Label lblname = new Label
             {
-                Text = produs.Nume,
+                Text = produs.name,
                 Font = fontTitlu,
                 ForeColor = Color.FromArgb(33, 33, 33),
                 Location = new Point(50, 300),
@@ -52,7 +53,7 @@ namespace TechAssemblyManager.UI
 
             Label lblPret = new Label
             {
-                Text = $"Preț: {produs.Pret} RON",
+                Text = $"Preț: {produs.price} RON",
                 Font = fontText,
                 ForeColor = Color.FromArgb(66, 66, 66),
                 Location = new Point(50, 340),
@@ -73,8 +74,8 @@ namespace TechAssemblyManager.UI
             btnInchide.FlatAppearance.BorderSize = 0;
             btnInchide.Click += (s, e) => this.Close();
 
-            this.Controls.Add(pic);
-            this.Controls.Add(lblNume);
+            // this.Controls.Add(pic);
+            this.Controls.Add(lblname);
             this.Controls.Add(lblPret);
             this.Controls.Add(btnInchide);
         }

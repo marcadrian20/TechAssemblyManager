@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System.Windows.Forms;
 using TechAssemblyManager.BLL;
-
+using TechAssemblyManager.DAL.FirebaseHelper;
+using TechAssemblyManager.Models;
 namespace TechAssemblyManager.UI
 {
     public partial class OnorareComenziForm : Form
@@ -12,20 +13,28 @@ namespace TechAssemblyManager.UI
         private ComboBox cmbStatusNou;
         private Label lblStatusNou;
         private MainForm mainForm;
-        public CartForm cartForm;
-        private ProductViewerForm prvf;
-        private AccountForm accountForm;
+        // public CartForm cartForm;
+        // private ProductViewerForm prvf;
+        // private AccountForm accountForm;
+        private List<Order> orders = new List<Order>();
         private ProductManagerBLL productManagerBLL;
+        private OrderManagerBLL orderManagerBLL;
+        private UserManagerBLL userManagerBLL;
+        private User currentUser;
 
-        public OnorareComenziForm(MainForm.User user,MainForm mainForm)
+        public OnorareComenziForm(MainForm mainForm, OrderManagerBLL orderManagerBLL)
         {
             if (mainForm == null || mainForm.Instance == null)
             {
                 throw new ArgumentNullException(nameof(mainForm), "MainForm or its Instance cannot be null.");
             }
-            this.mainForm = mainForm.Instance;
-            this.accountForm = accountForm;
-            this.prvf = new ProductViewerForm(this);
+            if (mainForm == null)
+                throw new ArgumentNullException(nameof(mainForm), "MainForm cannot be null.");
+
+            this.mainForm = mainForm;
+            this.orderManagerBLL = orderManagerBLL;
+            this.currentUser = SessionManager.LoggedInUser;
+            // this.prvf = new ProductViewerForm(this);
             this.Text = "Onorare Comenzi";
             this.Size = new System.Drawing.Size(500, 400);
             this.StartPosition = FormStartPosition.CenterScreen;
@@ -42,42 +51,27 @@ namespace TechAssemblyManager.UI
             this.Controls.Add(cmbStatusNou);
             this.Controls.Add(btnModificaStatus);
             this.FormClosing += OnorareComenziForm_FormClosing;
-            IncarcaComenzi();
+            IncarcaComenziAsync();
         }
         private void OnorareComenziForm_FormClosing(object sender, EventArgs e)
         {
-            if(mainForm != null  && !mainForm.IsDisposed)
+            if (mainForm != null && !mainForm.IsDisposed)
             {
                 mainForm.Show();
             }
         }
-        private void IncarcaComenzi()
+        private async Task IncarcaComenziAsync()
         {
-            if (cartForm == null)
+            lstComenzi.Items.Clear();
+            orders = await orderManagerBLL.GetAllOrdersAsync();
+            foreach (var order in orders)
             {
-                cartForm = new CartForm(mainForm, productManagerBLL, prvf);
-            }
-            cartForm.SetProduse(AppState.GetProduse());
-            if (cartForm != null)
-            {
-                List<Produs> produse = cartForm.GetProduse();
-                foreach (var produs in produse)
-                {
-                    lstComenzi.Items.Add($"Produs: {produs.Nume}, Preț: {produs.Pret}");
-                }
-                var comenzi=AppState.GetComenzi();
-                foreach (var comanda in comenzi)
-                {
-                    lstComenzi.Items.Add($"Comanda: {comanda.Nume}, Email: {comanda.Email}, Adresa: {comanda.Adresa}, " +
-                        $"Telefon: {comanda.Telefon}," +
-                        $" Status: {comanda.Status="in asteptare"}, Data: {comanda.DataComenzii.ToShortDateString()},Produse:{AppState.GetProduse}");
-
-                }
+                lstComenzi.Items.Add($"ID: {order.OrderId} | Client: {order.ClientUserName} | Status: {order.OrderStatus} | Data: {order.OrderDate.ToShortDateString()} | Total: {order.TotalCost} RON");
             }
 
         }
 
-        private void BtnModificaStatus_Click(object sender, EventArgs e)
+        private async void BtnModificaStatus_Click(object sender, EventArgs e)
         {
             if (lstComenzi.SelectedIndex == -1)
             {
@@ -92,26 +86,21 @@ namespace TechAssemblyManager.UI
                 MessageBox.Show("Selectează un status nou.");
                 return;
             }
-            if (cartForm == null)
-            {
-                cartForm = new CartForm(mainForm, productManagerBLL, prvf);
-            }
-            cartForm.SetProduse(AppState.GetProduse());
-            if (cartForm != null)
-            {
-                List<Produs> produse = cartForm.GetProduse();
-                var comenzi = AppState.GetComenzi();
-                foreach (var comanda in comenzi)
-                {
-                    lstComenzi.Items.Add($"Comanda: {comanda.Nume}, Email: {comanda.Email}, Adresa: {comanda.Adresa}, " +
-                        $"Telefon: {comanda.Telefon}," +
-                        $" Status: {comanda.Status = statusNou}, Data: {comanda.DataComenzii.ToShortDateString()},Produse:{AppState.GetProduse}");
 
-                }
+            var selectedOrder = orders[lstComenzi.SelectedIndex];
+            bool result = await orderManagerBLL.UpdateOrderStatusAsync(selectedOrder.OrderId, statusNou, currentUser);
 
+            if (result)
+            {
+                MessageBox.Show("Status actualizat cu succes!");
+                await IncarcaComenziAsync();
             }
-                // Aici actualizezi statusul în obiectul real
-                MessageBox.Show("Status actualizat la: " + statusNou);
+            else
+            {
+                MessageBox.Show("Eroare la actualizarea statusului.");
+            }
+            // Aici actualizezi statusul în obiectul real
+            MessageBox.Show("Status actualizat la: " + statusNou);
         }
     }
 }

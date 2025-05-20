@@ -1,50 +1,63 @@
 ﻿using System;
 using System.Drawing;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using TechAssemblyManager.BLL;
+using TechAssemblyManager.DAL.FirebaseHelper;
+using TechAssemblyManager.Models;
 
 namespace TechAssemblyManager.UI
 {
     public partial class CartForm : Form
     {
-        private List<Produs> produseAdaugate = new List<Produs>();
+        private Dictionary<string, SelectedProduct> cartProducts = new();
         private ProductViewerForm productViewerForm;
         private MainForm mainForm;
         private MainForm mainForm1;
         private MainForm mainForm2;
         private OnorareComenziForm onorareComenziForm;
         private ProductViewerForm prvf;
-        private readonly ProductManagerBLL productManagerBLL;
-
-        public CartForm(MainForm mainForm, ProductManagerBLL productManagerBLL)
+        private ProductManagerBLL productManagerBLL;
+        private UserManagerBLL userManagerBLL;
+        private CartManagerBLL cartManagerBLL;
+        private OrderManagerBLL orderManagerBLL;
+        private string currentUserName;
+        public CartForm(MainForm mainForm, CartManagerBLL cartManagerBLL, UserManagerBLL userManagerBLL, ProductManagerBLL productManagerBLL, OrderManagerBLL orderManagerBLL)
         {
             InitializeComponent();
-            this.mainForm = mainForm;
-            this.Load += CartForm_Load;
-            this.Resize += CartForm_Load;
+            this.cartManagerBLL = cartManagerBLL;
             this.productManagerBLL = productManagerBLL;
-        }
-
-        public CartForm(MainForm mainForm, ProductManagerBLL productManagerBLL, ProductViewerForm productViewerForm = null)
-        {
-            InitializeComponent();
-            this.productViewerForm = productViewerForm;
+            this.userManagerBLL = userManagerBLL;
+            this.orderManagerBLL = orderManagerBLL;
             this.mainForm = mainForm;
+            this.currentUserName = SessionManager.LoggedInUser.userName;
             this.FormClosing += CartForm_FormClosing;
             this.Load += CartForm_Load;
             this.Resize += CartForm_Load;
         }
 
-        public CartForm(AccountForm accountForm)
-        {
-            AccountForm = accountForm;
-        }
+        // public CartForm(MainForm mainForm, ProductManagerBLL productManagerBLL, UserManagerBLL userManagerBLL, ProductViewerForm productViewerForm = null)
+        // {
+        //     InitializeComponent();
+        //     this.productViewerForm = productViewerForm;
+        //     this.mainForm = mainForm;
+        //     this.FormClosing += CartForm_FormClosing;
+        //     this.Load += CartForm_Load;
+        //     this.Resize += CartForm_Load;
+        //     this.productManagerBLL = productManagerBLL;
+        //     this.userManagerBLL = userManagerBLL;
+        // }
 
-        public CartForm(OnorareComenziForm onorareComenziForm, ProductViewerForm prvf)
-        {
-            this.onorareComenziForm = onorareComenziForm;
-            this.prvf = prvf;
-        }
+        // public CartForm(AccountForm accountForm)
+        // {
+        //     AccountForm = accountForm;
+        // }
+
+        // public CartForm(OnorareComenziForm onorareComenziForm, ProductViewerForm prvf)
+        // {
+        //     this.onorareComenziForm = onorareComenziForm;
+        //     this.prvf = prvf;
+        // }
 
         private void CartForm_FormClosing(object sender, FormClosingEventArgs e)
         {
@@ -53,20 +66,98 @@ namespace TechAssemblyManager.UI
                 mainForm.Show();
             }
         }
-        public object Instance { get; private set; }
-        public object CosCumparaturi { get; internal set; }
-        public object getInstance { get; internal set; }
-        public AccountForm AccountForm { get; }
+        // public object Instance { get; private set; }
+        // public object CosCumparaturi { get; internal set; }
+        // public object getInstance { get; internal set; }
+        // public AccountForm AccountForm { get; }
 
-        private void CartForm_Load(object sender, EventArgs e)
+        private async void CartForm_Load(object sender, EventArgs e)
+        {
+            await LoadCartAsync();
+            StyleControls();
+        }
+
+
+        // Metodă ca să adaugi un produs în ListBox și să actualizezi totalul
+        // public async Task AdaugaProdusInListBox(Product produs)
+        // {
+        //     // await AddProductToCartAsync(produs.productId);
+        //     await 
+        //     listBox1.Items.Add($"{produs.name} - {produs.price} RON");
+        //     AppState.AdaugaProdus(produs);
+        //     CalculeazaTotal();
+        // }
+        // Add the missing GetProduse method to the ProductViewerForm class
+        // public async Task AddProductToCartAsync(string productId, int quantity)
+        // {
+        //     await cartManagerBLL.AddProductToCartAsync(currentUserName, productId, quantity);
+        //     await LoadCartAsync();
+        // }
+
+        // Example method to remove a product from cart
+        public async Task RemoveProductFromCartAsync(string productId)
+        {
+            await cartManagerBLL.RemoveProductFromCartAsync(currentUserName, productId);
+            await LoadCartAsync();
+        }
+
+        private async Task LoadCartAsync()
+        {
+            listBox1.Items.Clear();
+            cartProducts = await cartManagerBLL.GetUserCartAsync(currentUserName);
+
+            decimal total = 0;
+            foreach (var entry in cartProducts)
+            {
+                var product = await productManagerBLL.GetProductByIdAsync(entry.Key);
+                if (product != null)
+                {
+                    decimal price = (decimal)product.price * entry.Value.quantity;
+                    listBox1.Items.Add($"{product.name} x{entry.Value.quantity} - {price} RON");
+                    total += price;
+                }
+            }
+            Total.Text = $"Total: {total} RON";
+        }
+
+
+
+        private void backbutton_Click(object sender, EventArgs e)
+        {
+            productViewerForm.Show();
+            productViewerForm.Text = "ProductViewerForm";
+            this.Hide();
+        }
+
+        private void PlasareComanda_Click(object sender, EventArgs e)
+        {
+            OrderInformation orderInfo = new OrderInformation(mainForm, productManagerBLL, userManagerBLL, orderManagerBLL, SessionManager.LoggedInUser);
+            orderInfo.Show();
+            this.Hide();
+        }
+        // public void SetProduse(List<Product> produse)
+        // {
+        //     produseAdaugate = produse;
+        //     listBox1.Items.Clear();
+        //     foreach (var produs in produse)
+        //     {
+        //         listBox1.Items.Add($"{produs.name} - {produs.price} RON");
+        //     }
+        //     CalculeazaTotal();
+        // }
+        private void Myaccount_Click(object sender, EventArgs e)
+        {
+            AccountForm accForm = new AccountForm(mainForm, productManagerBLL, userManagerBLL, orderManagerBLL);
+            accForm.ShowDialog();
+            this.Hide();
+        }
+        private void StyleControls()
         {
             int formWidth = this.ClientSize.Width;
             int formHeight = this.ClientSize.Height;
             int margin = 10;
 
-            // Setări generale
             this.BackColor = Color.White;
-
             Font modernFont = new Font("Segoe UI", 10, FontStyle.Bold);
             backbutton.Font = modernFont;
             Cosdecumparaturi.Font = modernFont;
@@ -75,8 +166,7 @@ namespace TechAssemblyManager.UI
             Total.Font = new Font("Segoe UI", 10, FontStyle.Regular);
             listBox1.Font = new Font("Segoe UI", 10, FontStyle.Regular);
 
-            // Margini rotunjite și culori
-            Color accentColor = Color.FromArgb(0, 120, 215); // Albastru Windows
+            Color accentColor = Color.FromArgb(0, 120, 215);
 
             Button[] buttons = { backbutton, Myaccount, PlasareComanda };
             foreach (Button btn in buttons)
@@ -89,16 +179,13 @@ namespace TechAssemblyManager.UI
                 btn.Region = System.Drawing.Region.FromHrgn(CreateRoundRectRgn(0, 0, btn.Width, btn.Height, 15, 15));
             }
 
-            // TextBox stilizat
             Total.BorderStyle = BorderStyle.FixedSingle;
             Total.BackColor = Color.WhiteSmoke;
             Total.ForeColor = Color.Black;
 
-            // ListBox stilizat
             listBox1.BorderStyle = BorderStyle.FixedSingle;
             listBox1.BackColor = Color.WhiteSmoke;
 
-            // Poziționare
             backbutton.Left = margin;
             backbutton.Top = margin;
             Myaccount.Top = margin;
@@ -116,74 +203,11 @@ namespace TechAssemblyManager.UI
             PlasareComanda.Top = Total.Bottom + margin;
             PlasareComanda.Left = (formWidth - PlasareComanda.Width) / 2;
         }
+
         [System.Runtime.InteropServices.DllImport("Gdi32.dll", EntryPoint = "CreateRoundRectRgn")]
         private static extern IntPtr CreateRoundRectRgn(
-    int nLeftRect, int nTopRect, int nRightRect, int nBottomRect,
-    int nWidthEllipse, int nHeightEllipse);
-        // Metodă ca să adaugi un produs în ListBox și să actualizezi totalul
-        public void AdaugaProdusInListBox(Produs produs)
-        {
-            produseAdaugate.Add(produs);
-            listBox1.Items.Add($"{produs.Nume} - {produs.Pret} RON");
-            AppState.AdaugaProdus(produs);
-            CalculeazaTotal();
-        }
-        // Add the missing GetProduse method to the ProductViewerForm class
-        public List<Produs> GetProduse()
-        {
-            return new List<Produs>(produseAdaugate);
-        }
+            int nLeftRect, int nTopRect, int nRightRect, int nBottomRect,
+            int nWidthEllipse, int nHeightEllipse);
 
-        private void CalculeazaTotal()
-        {
-            decimal total = 0;
-            foreach (var item in listBox1.Items)
-            {
-                string text = item.ToString();
-                int index = text.LastIndexOf('-');
-                if (index >= 0)
-                {
-                    string pretText = text.Substring(index + 1).Replace("RON", "").Trim();
-                    if (decimal.TryParse(pretText, out decimal pret))
-                    {
-                        total += pret;
-                    }
-                }
-            }
-            Total.Text = $"Total: {total} RON";
-        }
-
-
-
-
-        private void backbutton_Click(object sender, EventArgs e)
-        {
-            productViewerForm.Show();
-            productViewerForm.Text = "ProductViewerForm";
-            this.Hide();
-        }
-
-        private void PlasareComanda_Click(object sender, EventArgs e)
-        {
-            OrderInformation orderInfo = new OrderInformation(mainForm);
-            orderInfo.Show();
-            this.Hide();
-        }
-        public void SetProduse(List<Produs> produse)
-        {
-            produseAdaugate = produse;
-            listBox1.Items.Clear();
-            foreach (var produs in produse)
-            {
-                listBox1.Items.Add($"{produs.Nume} - {produs.Pret} RON");
-            }
-            CalculeazaTotal();
-        }
-        private void Myaccount_Click(object sender, EventArgs e)
-        {
-            AccountForm accForm = new AccountForm(mainForm, this, productViewerForm, productManagerBLL);
-            accForm.ShowDialog();
-            this.Hide();
-        }
     }
 }

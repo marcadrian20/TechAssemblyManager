@@ -235,7 +235,11 @@ namespace FirebaseWrapper
                 await UpdateAsync($"ServiceRequests/{requestId}", request);
             }
         }
-
+        public async Task<List<ServiceRequest>> GetAllServiceRequestsAsync()
+        {
+            var requests = await GetAsync<Dictionary<string, ServiceRequest>>("ServiceRequests");
+            return requests?.Values.ToList() ?? new List<ServiceRequest>();
+        }
         // Product Filtering
         public async Task<List<Product>> GetProductsByCategoryAsync(string categoryId)
         {

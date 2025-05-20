@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
+using TechAssemblyManager.BLL;
+using TechAssemblyManager.Models;
 
 namespace TechAssemblyManager.UI
 {
@@ -8,18 +10,14 @@ namespace TechAssemblyManager.UI
         private TextBox txtNume, txtPret, txtDescriere;
         private ComboBox cmbCategorie, cmbScor;
         private Button btnAdauga;
-        private ProductViewerForm productViewerForm;
-        private ProductViewerForm _productViewerForm;
-        private MainForm mainForm;
-        public AdaugaProdusForm(ProductViewerForm productViewerForm,MainForm mainForm)
+        private ProductManagerBLL productManagerBLL;
+        private User currentUser;
+
+        public AdaugaProdusForm(ProductManagerBLL productManagerBLL, User currentUser)
         {
-            if (mainForm == null || mainForm.Instance == null)
-            {
-                throw new ArgumentNullException(nameof(mainForm), "MainForm or its Instance cannot be null.");
-            }
-            this.mainForm = mainForm.Instance;
             InitializeComponent();
-            _productViewerForm = productViewerForm;
+            this.productManagerBLL = productManagerBLL;
+            this.currentUser = currentUser;
             this.Text = "Adaugă Produs Nou";
             this.Size = new System.Drawing.Size(400, 400);
 
@@ -56,7 +54,7 @@ namespace TechAssemblyManager.UI
                 Width = 300
             };
             btnAdauga.Click += BtnAdauga_Click;
-            this.FormClosing += new FormClosingEventHandler(AdaugaProdusForm_FormClosing); // Explicitly specify the delegate
+            this.FormClosing += AdaugaProdusForm_FormClosing;
             this.Controls.AddRange(new Control[] {
                 lblNume, txtNume,
                 lblPret, txtPret,
@@ -66,14 +64,13 @@ namespace TechAssemblyManager.UI
                 btnAdauga
             });
         }
+
         private void AdaugaProdusForm_FormClosing(object? sender, FormClosingEventArgs e)
         {
-            if (mainForm != null && !mainForm.IsDisposed)
-            {
-                mainForm.Show();
-            }
+            // Optionally, refresh product list in parent form
         }
-        private void BtnAdauga_Click(object sender, EventArgs e)
+
+        private async void BtnAdauga_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(txtNume.Text) ||
                 string.IsNullOrWhiteSpace(txtPret.Text) ||
@@ -85,30 +82,33 @@ namespace TechAssemblyManager.UI
                 return;
             }
 
-            if (!decimal.TryParse(txtPret.Text, out decimal pret))
+            if (!float.TryParse(txtPret.Text, out float pret))
             {
                 MessageBox.Show("Prețul trebuie să fie un număr valid.");
                 return;
             }
-            if (_productViewerForm == null)
-            {
-                _productViewerForm=new ProductViewerForm(this);
-                return;
-            }
 
-            Produs produs = new Produs
+            var product = new Product
             {
-                Nume = txtNume.Text,
-                Pret = pret,
-                Descriere = $"{cmbCategorie.SelectedItem} - {txtDescriere.Text.Trim()}",
-                ScorCritici = int.Parse(cmbScor.SelectedItem.ToString()),
-                Categorie = cmbCategorie.SelectedItem.ToString()
+                productId = Guid.NewGuid().ToString(),
+                name = txtNume.Text.Trim(),
+                price = pret,
+                description = txtDescriere.Text.Trim(),
+                categoryId = cmbCategorie.SelectedItem.ToString(),
+                rating = int.Parse(cmbScor.SelectedItem.ToString()),
+                isActive = true
             };
-            _productViewerForm.AdaugaProdus(produs);    
-            AppState.AdaugaProdus(produs);
-            _productViewerForm.ReincarcaProduse();
-            MessageBox.Show("Produs adăugat cu succes!");
-            this.Close();
+
+            bool result = await productManagerBLL.AddProductAsync(product, currentUser);
+            if (result)
+            {
+                MessageBox.Show("Produs adăugat cu succes!");
+                this.Close();
+            }
+            else
+            {
+                MessageBox.Show("Eroare la adăugarea produsului (verificați permisiunile sau datele).");
+            }
         }
     }
 }

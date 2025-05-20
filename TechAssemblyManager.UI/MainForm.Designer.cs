@@ -56,7 +56,7 @@ namespace TechAssemblyManager.UI
             TechAssemblyManager.TabIndex = 0;
             TechAssemblyManager.TabStop = false;
             TechAssemblyManager.Text = "TechAssemblyManage";
-            TechAssemblyManager.Enter += TechAssemblyManager_Enter;
+            //TechAssemblyManager.Enter += TechAssemblyManager_Enter;
             // 
             // pictureBox1
             // 
@@ -124,7 +124,7 @@ namespace TechAssemblyManager.UI
             Searchbar.Size = new Size(133, 23);
             Searchbar.TabIndex = 1;
             Searchbar.Text = "Searchbar";
-            Searchbar.TextChanged += Searchbar_TextChanged;
+            //Searchbar.TextChanged += Searchbar_TextChanged;
             // 
             // MainForm
             // 

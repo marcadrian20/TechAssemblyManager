@@ -7,15 +7,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using TechAssemblyManager.Models;
 
 namespace TechAssemblyManager.UI
 {
     public partial class CheckoutForm : Form
     {
-        private List<Produs> cos;
+        private List<Product> cos;
         private object cosCumparaturi;
         private MainForm mainForm;
-        public CheckoutForm(List<Produs> cosCumparaturi,MainForm mainForm)
+        public CheckoutForm(List<Product> cosCumparaturi,MainForm mainForm)
         {
             this.mainForm = mainForm;
             InitializeComponent();
@@ -40,15 +41,15 @@ namespace TechAssemblyManager.UI
         {
             foreach (var produs in cos)
             {
-                ListViewItem item = new ListViewItem(produs.Nume);
-                item.SubItems.Add($"{produs.Pret} RON");
+                ListViewItem item = new ListViewItem(produs.name);
+                item.SubItems.Add($"{produs.price} RON");
                 listView1.Items.Add(item);
             }
         }
 
         private void AfiseazaTotal()
         {
-            decimal total = cos.Sum(p => p.Pret);
+            float total = cos.Sum(p => p.price);
             lblTotal.Text = $"Total: {total} RON";
         }
 

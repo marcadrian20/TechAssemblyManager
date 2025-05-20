@@ -139,5 +139,48 @@ namespace TechAssemblyManager.BLL
             await _firebaseHelper.UpdateAsync($"Users/{user.userName}", user);
             return true;
         }
+
+        public string GetAccountType(User user)
+        {
+            if (user == null)
+                return "Guest";
+            if (IsManager(user))
+                return "Manager";
+            if (IsSenior(user))
+                return "Senior";
+            if (IsJunior(user))
+                return "Junior";
+            if (IsCustomer(user))
+                return "Utilizator";
+            return "Utilizator";
+        }
+
+        public async Task<bool> UpdateCustomerDataAsync(string userName, CustomerData data)
+        {
+            if (string.IsNullOrWhiteSpace(userName) || data == null)
+                return false;
+
+            var user = await GetUserByUsernameAsync(userName);
+            if (user == null || user.userType != "customer")
+                return false;
+
+            user.customerData = data;
+            await _firebaseHelper.UpdateAsync($"Users/{userName}", user);
+            return true;
+        }
+
+        public async Task<bool> UpdatePasswordAsync(string userName, string newPassword)
+        {
+            if (string.IsNullOrWhiteSpace(userName) || string.IsNullOrWhiteSpace(newPassword))
+                return false;
+
+            var user = await GetUserByUsernameAsync(userName);
+            if (user == null)
+                return false;
+
+            user.passwordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+            await _firebaseHelper.UpdateAsync($"Users/{userName}", user);
+            return true;
+        }
     }
 }

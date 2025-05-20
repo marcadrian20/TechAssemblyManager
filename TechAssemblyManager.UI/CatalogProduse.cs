@@ -9,19 +9,27 @@ namespace TechAssemblyManager.UI
     public partial class CatalogProduse : Form
     {
         private FlowLayoutPanel pcComponentsSidebar; // FlowLayoutPanel pentru componentele PC
-        private MainForm m;
-        private CartForm cartForm;
+        private MainForm mainForm;
+        // private CartForm cartForm;
         private ProductManagerBLL productManagerBLL;
-        private ProductViewerForm prvf;
+        private UserManagerBLL userManagerBLL;
+        private CartManagerBLL cartManagerBLL;
+        private OrderManagerBLL orderManagerBLL;
+
+        // private ProductViewerForm prvf;
         private readonly string[] categoriiProduse = { "Toate", "Laptopuri", "Desktopuri", "Monitoare" };
 
         public object Instance { get; private set; }
 
-        public CatalogProduse(MainForm m)
+        public CatalogProduse(MainForm mainForm, ProductManagerBLL productManagerBLL, UserManagerBLL userManagerBLL, CartManagerBLL cartManagerBLL, OrderManagerBLL orderManagerBLL)
         {
             InitializeComponent();
             StylizeButtons();
-            this.m = m;
+            this.mainForm = mainForm;
+            this.productManagerBLL = productManagerBLL;
+            this.userManagerBLL = userManagerBLL;
+            this.cartManagerBLL = cartManagerBLL;
+            this.orderManagerBLL = orderManagerBLL;
             this.Resize += (s, e) => LayoutControls();
 
             // Inițializare FlowLayoutPanel pentru sidebar-ul cu componentele PC
@@ -41,9 +49,9 @@ namespace TechAssemblyManager.UI
         }
         private void CatalogProduse_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (m != null && !m.IsDisposed)
+            if (mainForm != null && !mainForm.IsDisposed)
             {
-                m.Show();
+                mainForm.Show();
             }
         }
         private void InitPcComponentsSidebar()
@@ -68,7 +76,7 @@ namespace TechAssemblyManager.UI
                 btn.Click += (s, e) =>
                 {
                     this.Hide();
-                    ProductViewerForm pvf = new ProductViewerForm(m, cartForm, productManagerBLL, componenta);
+                    ProductViewerForm pvf = new ProductViewerForm(mainForm, productManagerBLL, cartManagerBLL, userManagerBLL,orderManagerBLL, componenta);
                     pvf.Show();
                 };
 
@@ -209,7 +217,7 @@ namespace TechAssemblyManager.UI
                 {
                     string categorieAleasa = (string)((Button)s).Tag;
                     this.Hide(); // ascundem CatalogProduse
-                    ProductViewerForm pvf = new ProductViewerForm(m, cartForm, productManagerBLL, categorieAleasa); // trimitem categoria
+                    ProductViewerForm pvf = new ProductViewerForm(mainForm, productManagerBLL, cartManagerBLL, userManagerBLL,orderManagerBLL, categorieAleasa);
                     pvf.Show();
                 };
 
@@ -222,24 +230,24 @@ namespace TechAssemblyManager.UI
             sidebar.BackColor = Color.FromArgb(40, 40, 45);
             sidebar.Visible = false;
 
-            // Buton pentru a deschide ProductViewerForm
-            Button btnProduse = new Button
-            {
-                Text = "Catalog Produse",
-                Dock = DockStyle.Top,
-                Height = 45,
-                ForeColor = Color.White,
-                BackColor = Color.FromArgb(28, 28, 28),
-                FlatStyle = FlatStyle.Flat
-            };
-            btnProduse.Click += (s, e) =>
-            {
-                this.Hide(); // ascundem fereastra actuală
-                ProductViewerForm pvf = new ProductViewerForm(m, cartForm, productManagerBLL);
-                pvf.Text = "ProductViwerForm";
-                pvf.Show();
-            };
-            sidebar.Controls.Add(btnProduse);
+            // // Buton pentru a deschide ProductViewerForm
+            // Button btnProduse = new Button
+            // {
+            //     Text = "Catalog Produse",
+            //     Dock = DockStyle.Top,
+            //     Height = 45,
+            //     ForeColor = Color.White,
+            //     BackColor = Color.FromArgb(28, 28, 28),
+            //     FlatStyle = FlatStyle.Flat
+            // };
+            // btnProduse.Click += (s, e) =>
+            // {
+            //     this.Hide(); // ascundem fereastra actuală
+            //     ProductViewerForm pvf = new ProductViewerForm(mainForm, productManagerBLL, cartManagerBLL, userManagerBLL, componenta);
+            //     pvf.Text = "ProductViwerForm";
+            //     pvf.Show();
+            // };
+            // sidebar.Controls.Add(btnProduse);
 
             // Buton pentru închidere sidebar
             Button btnInchide = new Button
@@ -259,40 +267,28 @@ namespace TechAssemblyManager.UI
             sidebar.Controls.Add(btnInchide);
         }
 
-        private void MyAccount1_Click(object sender, EventArgs e) { }
 
         private void Myaccount_Click(object sender, EventArgs e)
         {
-            AccountForm accForm = new AccountForm(m, this,prvf, productManagerBLL);
+            var accForm = new AccountForm(mainForm, productManagerBLL, userManagerBLL, orderManagerBLL);
             accForm.ShowDialog();
             this.Hide();
         }
 
         private void SiglaBtn1_Click(object sender, EventArgs e)
         {
-            m.Show();
+            mainForm.Show();
             this.Close();
         }
 
         private void Back_Click(object sender, EventArgs e)
         {
-            MainForm mainForm = new MainForm();
             mainForm.Show();
             this.Hide();
         }
-        public void AddProdusToCos(Produs produs)
-        {
-            AppState.AdaugaProdus(produs);
-        }
         private void cos_Click(object sender, EventArgs e)
         {
-            if (cartForm == null)
-            {
-                cartForm = new CartForm(m, productManagerBLL);
-            }
-
-            cartForm.SetProduse(AppState.GetProduse());
-
+            var cartForm = new CartForm(mainForm, cartManagerBLL, userManagerBLL, productManagerBLL, orderManagerBLL);
             cartForm.Show();
             cartForm.BringToFront();
             this.Hide();
