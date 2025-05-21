@@ -1,0 +1,31 @@
+﻿<Window x:Class="TechAssemblyManager.UI.PromotionsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TechAssemblyManager.UI"
+        mc:Ignorable="d"
+        Title="Gestionare Promoții" Height="500" Width="800" WindowStartupLocation="CenterScreen">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <DataGrid Name="PromotionsGrid" AutoGenerateColumns="False" IsReadOnly="True" Margin="0 0 0 10">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="ID" Binding="{Binding promotionId}" Width="100"/>
+                <DataGridTextColumn Header="Nume" Binding="{Binding name}" Width="150"/>
+                <DataGridTextColumn Header="Reducere (%)" Binding="{Binding discountPercentage}" Width="100"/>
+                <DataGridTextColumn Header="Activă" Binding="{Binding isActive}" Width="60"/>
+                <DataGridTextColumn Header="De la" Binding="{Binding startDate}" Width="120"/>
+                <DataGridTextColumn Header="Până la" Binding="{Binding endDate}" Width="120"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+            <Button Content="Adaugă Promoție" Click="BtnAdd_Click" Margin="5"/>
+            <Button Content="Șterge Promoție" Click="BtnDelete_Click" Margin="5"/>
+        </StackPanel>
+    </Grid>
+</Window>
