@@ -12,6 +12,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using TechAssemblyManager.BLL;
 using TechAssemblyManager.Models;
 
 namespace TechAssemblyManager.UI
@@ -22,14 +23,12 @@ namespace TechAssemblyManager.UI
     public partial class RegisterWindow : Window
     {
         private FirebaseHelper _firebaseHelper;
-        public RegisterWindow()
+        private UserManagerBLL _userManagerBLL;
+        public RegisterWindow(UserManagerBLL userManagerBLL)
         {
             InitializeComponent();
-            _firebaseHelper = new FirebaseHelper(
-              "https://techassemblymanager-default-rtdb.firebaseio.com/",
-              "ky7wJX7Iu46hjBHWqDJNWjJW19NeYQurX4Z9VeUv",
-              "AIzaSyBxq3J01JqE6yonLc9plkzA6c3-Gi1r1eU"
-          );
+            
+            this._userManagerBLL = userManagerBLL;
         }
 
         private async void BtnRegister_Click(object sender, RoutedEventArgs e)
@@ -67,7 +66,8 @@ namespace TechAssemblyManager.UI
                 lastName = lastName,
                 userType = "customer",
                 passwordHash = BCrypt.Net.BCrypt.HashPassword(password),
-                createdAt = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
+                createdAt = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+
             };
 
             await _firebaseHelper.SetAsync($"Users/{username}", user);

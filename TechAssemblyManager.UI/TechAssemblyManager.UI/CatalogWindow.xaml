@@ -5,34 +5,63 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TechAssemblyManager.UI"
         mc:Ignorable="d"
-        Title="Catalog Produse" Height="500" Width="800" WindowStartupLocation="CenterScreen">
+         Title="Catalog Produse"
+        Height="700"
+        Width="800"
+        WindowStartupLocation="CenterScreen">
+
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <!-- Filtru categorie -->
             <RowDefinition Height="*"/>
+            <!-- Tabel produse -->
+            <RowDefinition Height="Auto"/>
+            <!-- Buton jos -->
         </Grid.RowDefinitions>
 
-        <!-- Filtrare după categorie -->
+        <!-- Filtru categorie -->
         <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
             <TextBlock Text="Categorie:" VerticalAlignment="Center" Margin="0,0,10,0"/>
-            <ComboBox Name="CmbCategorie" Width="200" SelectionChanged="CmbCategorie_SelectionChanged"/>
+            <ComboBox Name="CmbCategorie"
+                      Width="200"
+                      SelectionChanged="CmbCategorie_SelectionChanged"/>
         </StackPanel>
 
-        <!-- Afișare produse -->
-        <DataGrid Name="ProductGrid" Grid.Row="1" AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Single">
+        <!-- Tabel produse -->
+        <DataGrid Name="ProductGrid"
+                  Grid.Row="1"
+                  AutoGenerateColumns="False"
+                  IsReadOnly="True"
+                  SelectionMode="Single"
+                  SelectionChanged="ProductGrid_SelectionChanged">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Nume" Binding="{Binding Name}" Width="*"/>
                 <DataGridTextColumn Header="Preț (lei)" Binding="{Binding Price}" Width="100"/>
                 <DataGridTextColumn Header="Rating" Binding="{Binding Rating}" Width="80"/>
                 <DataGridTextColumn Header="Descriere" Binding="{Binding Description}" Width="200"/>
-                <DataGridTemplateColumn Header="Acțiune" Width="120">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <Button Content="Adaugă în Coș" Click="AddToCart_Click" IsEnabled="{Binding CanAdd}"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
+
+        <!-- Buton jos -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0" VerticalAlignment="Center" >
+            <TextBlock x:Name="LblInfo"
+               VerticalAlignment="Center"
+               Foreground="DarkRed"
+               FontWeight="Bold"
+               Margin="0,0,20,0"
+               TextWrapping="Wrap"
+               Width="400"/>
+            <Button Name="BtnAddToCart"
+            Content="Adaugă în Coș"
+            Width="150"
+            Height="35"
+            Background="Green"
+            Foreground="White"
+            FontWeight="Bold"
+            Click="BtnAddToCart_Click"
+            IsEnabled="False"/>
+        </StackPanel>
+
     </Grid>
 </Window>

@@ -22,7 +22,7 @@
             <Button Content="Cerere Service" Name="BtnServiceRequest" Click="BtnServiceRequest_Click" Margin="0,5"/>
             <Button Content="Istoric Service" Name="BtnServiceHistory" Click="BtnServiceHistory_Click" Margin="0,5"/>
             <Button Content="Coș" Name="BtnCart" Click="BtnCart_Click" Margin="0,5"/>
-
+            <Button Content="Register" Name="BtnRegister" Click="BtnRegister_Click" Margin="0,5"/>
         </StackPanel>
     </Grid>
 </Window>

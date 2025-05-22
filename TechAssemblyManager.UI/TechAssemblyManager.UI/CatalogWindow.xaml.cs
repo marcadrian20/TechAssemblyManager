@@ -12,6 +12,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using TechAssemblyManager.BLL;
 using TechAssemblyManager.DAL.FirebaseHelper;
 using TechAssemblyManager.Models;
 
@@ -22,64 +23,132 @@ namespace TechAssemblyManager.UI
     /// </summary>
     public partial class CatalogWindow : Window
     {
-        private FirebaseHelper _firebaseHelper;
-        private List<Product> _allProducts = new List<Product>();
-        private List<ProductCategory> _categories = new List<ProductCategory>();
-        public CatalogWindow()
+        private readonly ProductManagerBLL _productManager;
+        private readonly CartManagerBLL _cartManager;
+        private List<Product> _allProducts = new();
+        private List<ProductCategory> _categories = new();
+        private dynamic selectedProduct;
+        private UserManagerBLL userManagerBLL;
+        private ProductManagementWindow _productManagementWindow;
+        private CartWindow _cartWindow;
+        private OrderManagerBLL orderManager;
+        public CatalogWindow(ProductManagerBLL productManager, CartManagerBLL cartManager, UserManagerBLL userManagerBLL, ProductManagementWindow productManagementWindow, OrderManagerBLL orderManager)
         {
             InitializeComponent();
-            _firebaseHelper = new FirebaseHelper(
-              "https://techassemblymanager-default-rtdb.firebaseio.com/",
-              "ky7wJX7Iu46hjBHWqDJNWjJW19NeYQurX4Z9VeUv",
-              "AIzaSyBxq3J01JqE6yonLc9plkzA6c3-Gi1r1eU"
-          );
+            _productManager = productManager;
+            _cartManager = cartManager;
+            this.userManagerBLL = userManagerBLL;
+            _productManagementWindow = productManagementWindow;
+            this._cartManager = cartManager;
+            this.orderManager = orderManager;
             LoadData();
         }
         private async void LoadData()
         {
-            _allProducts = await _firebaseHelper.GetAllActiveProductsAsync();
-            var categoryDict = await _firebaseHelper.GetAsync<Dictionary<string, ProductCategory>>("ProductCategories");
-            _categories = categoryDict?.Values.ToList() ?? new List<ProductCategory>();
+            _allProducts = await _productManager.GetAllActiveProductsAsync();
+            _categories = await _productManager.GetProductCategoriesAsync();
 
             CmbCategorie.ItemsSource = _categories;
             CmbCategorie.DisplayMemberPath = "name";
             CmbCategorie.SelectedValuePath = "categoryId";
+
+            BtnAddToCart.IsEnabled = false;
+            LblInfo.Text = "";
         }
+
+
 
 
         private void CmbCategorie_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (CmbCategorie.SelectedValue is string selectedCategoryId)
             {
+                bool canAdd = SessionManager.LoggedInUser?.userType == "customer";
+
                 var filtered = _allProducts
                     .Where(p => p.categoryId == selectedCategoryId)
-                    .Select(p => new CatalogProductViewModel
+                    .Select(p => new
                     {
                         ProductId = p.productId,
                         Name = p.name,
                         Price = p.price,
                         Rating = p.rating,
                         Description = p.description,
-                        CanAdd = SessionManager.LoggedInUser?.userType == "customer"
+                        CanAdd = canAdd
                     }).ToList();
 
                 ProductGrid.ItemsSource = filtered;
-            }
-        }
-        private async void AddToCart_Click(object sender, RoutedEventArgs e)
-        {
-            if (sender is Button btn && btn.DataContext is CatalogProductViewModel product)
-            {
-                var user = SessionManager.LoggedInUser;
-                if (user == null || user.userType != "customer")
-                {
-                    MessageBox.Show("Trebuie să fii logat ca client pentru a adăuga în coș.");
-                    return;
-                }
 
-                await _firebaseHelper.AddProductToCartAsync(user.userName, product.ProductId, 1);
-                MessageBox.Show("Produs adăugat în coș!");
+                BtnAddToCart.IsEnabled = false;
+                LblInfo.Text = "";
+                selectedProduct = null;
             }
         }
+        private async void BtnAddToCart_Click(object sender, RoutedEventArgs e)
+        {
+            var user = SessionManager.LoggedInUser;
+
+            if (user == null || !userManagerBLL.IsCustomer(user))
+            {
+                MessageBox.Show("Trebuie să fii logat ca și client.");
+                return;
+            }
+
+            if (selectedProduct == null)
+            {
+                MessageBox.Show("Selectează un produs.");
+                return;
+            }
+
+            string productId = selectedProduct.ProductId;
+            int quantityToAdd = 1;
+
+            // Obține coșul curent al utilizatorului
+            var currentCart = await _cartManager.GetUserCartAsync(user.userName);
+
+            if (currentCart.ContainsKey(productId))
+            {
+                int existingQty = currentCart[productId].quantity;
+                await _cartManager.AddProductToCartAsync(user.userName, productId, existingQty + quantityToAdd);
+            }
+            else
+            {
+                await _cartManager.AddProductToCartAsync(user.userName, productId, quantityToAdd);
+            }
+
+            MessageBox.Show($"Produsul '{selectedProduct.Name}' a fost adăugat/actualizat în coș!");
+            _cartWindow=new CartWindow(_cartManager,_productManager,orderManager);
+            _cartWindow.Show();
+            this.Hide();
+
+        }
+
+        private void ProductGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (ProductGrid.SelectedItem != null)
+            {
+                selectedProduct = ProductGrid.SelectedItem;
+                bool canAdd = SessionManager.LoggedInUser?.userType == "customer";
+
+                if (!canAdd)
+                {
+                    LblInfo.Text = "Trebuie să fii autentificat ca și client pentru a adăuga în coș.";
+                    BtnAddToCart.IsEnabled = false;
+                }
+                else
+                {
+                    LblInfo.Text = "";
+                    BtnAddToCart.IsEnabled = true;
+                }
+            }
+            else
+            {
+                selectedProduct = null;
+                BtnAddToCart.IsEnabled = false;
+                LblInfo.Text = "";
+            }
+        }
+        
+
     }
 }

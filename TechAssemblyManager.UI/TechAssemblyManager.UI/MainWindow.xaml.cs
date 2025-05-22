@@ -23,6 +23,9 @@ public partial class MainWindow : Window
     private OrderManagerBLL _orderManager;
     private ProductManagerBLL _productManager;
     private UserManagerBLL _userManagerBLL;
+    private ProductManagementWindow _productManagementWindow;
+    private RegisterWindow _registerWindow;
+    private CartWindow _cartWindow;
     public MainWindow()
     {
         InitializeComponent();
@@ -35,6 +38,7 @@ public partial class MainWindow : Window
         _orderManager = new OrderManagerBLL(_firebaseHelper);
         _productManager = new ProductManagerBLL(_firebaseHelper);
         _userManagerBLL = new UserManagerBLL(_firebaseHelper);
+
     }
 
     private void BtnLogin_Click(object sender, RoutedEventArgs e)
@@ -44,7 +48,7 @@ public partial class MainWindow : Window
 
     private void BtnCatalog_Click(object sender, RoutedEventArgs e)
     {
-        new CatalogWindow().Show();
+        new CatalogWindow(_productManager,_cartManager,_userManagerBLL,_productManagementWindow,_orderManager).Show();
     }
 
     private void BtnPromotions_Click(object sender, RoutedEventArgs e)
@@ -70,5 +74,10 @@ public partial class MainWindow : Window
     private void BtnCart_Click(object sender, RoutedEventArgs e)
     {
         new CartWindow(_cartManager, _productManager, _orderManager).Show();
+    }
+
+    private void BtnRegister_Click(object sender, RoutedEventArgs e)
+    {
+        new RegisterWindow(_userManagerBLL).Show();
     }
 }

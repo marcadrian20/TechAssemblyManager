@@ -1,0 +1,70 @@
+﻿<Window x:Class="TechAssemblyManager.UI.ProductManagementWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TechAssemblyManager.UI"
+        mc:Ignorable="d"
+          Title="Adăugare Produs"
+        Height="550"
+        Width="600"
+        WindowStartupLocation="CenterScreen">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <!-- Formular -->
+            <RowDefinition Height="Auto"/>
+            <!-- Status mesaj -->
+            <RowDefinition Height="*"/>
+            <!-- Spațiu flexibil -->
+            <RowDefinition Height="Auto"/>
+            <!-- Buton jos -->
+        </Grid.RowDefinitions>
+
+        <!-- Formular produs -->
+        <StackPanel Grid.Row="0" Width="400" VerticalAlignment="Top" HorizontalAlignment="Left">
+
+            <TextBlock Text="ID Produs:" Margin="0,0,0,5"/>
+            <TextBox Name="ProductIdTextBox" Margin="0,0,0,10"/>
+
+            <TextBlock Text="Nume:" Margin="0,0,0,5"/>
+            <TextBox Name="ProductNameTextBox" Margin="0,0,0,10"/>
+
+            <TextBlock Text="Descriere:" Margin="0,0,0,5"/>
+            <TextBox Name="ProductDescriptionTextBox" AcceptsReturn="True" Height="60" Margin="0,0,0,10"/>
+
+            <TextBlock Text="Preț:" Margin="0,0,0,5"/>
+            <TextBox Name="ProductPriceTextBox" Margin="0,0,0,10"/>
+
+            <CheckBox Name="ProductIsActiveCheckBox" Content="Activ" Margin="0,0,0,10" IsChecked="True"/>
+
+            <TextBlock Text="Categorie:" Margin="0,0,0,5"/>
+            <ComboBox Name="CategoryComboBox" DisplayMemberPath="name" SelectedValuePath="categoryId" Margin="0,0,0,10"/>
+        </StackPanel>
+
+        <!-- Status mesaj -->
+        <TextBlock Grid.Row="1"
+                   Name="LblStatus"
+                   Foreground="DarkRed"
+                   FontWeight="Bold"
+                   Margin="0,10,0,0"
+                   TextWrapping="Wrap" />
+
+        <!-- Spacer -->
+        <Rectangle Grid.Row="2" Height="20"/>
+
+        <!-- Buton de adăugare produs -->
+        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Name="AddProductButton"
+                    Content="Adaugă Produs"
+                    Width="150"
+                    Height="40"
+                    Margin="0,10,0,0"
+                    Background="Green"
+                    Foreground="White"
+                    FontWeight="Bold"
+                    Click="AddProductButton_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>
