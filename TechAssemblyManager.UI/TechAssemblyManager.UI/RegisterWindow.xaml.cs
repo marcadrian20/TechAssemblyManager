@@ -73,9 +73,10 @@ namespace TechAssemblyManager.UI
             await _firebaseHelper.SetAsync($"Users/{username}", user);
             MessageBox.Show("Cont creat cu succes!", "Succes");
 
-            var login = new LoginWindow();
-            login.Show();
+            //
+            //login.Show();
             this.Close();
+
         }
     }
 }

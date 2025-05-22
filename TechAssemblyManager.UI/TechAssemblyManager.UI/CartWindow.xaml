@@ -21,7 +21,7 @@
                 <DataGridTemplateColumn Header="Acțiune" Width="100">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <Button Content="Șterge" Click="BtnRemove_Click"/>
+                            <Button Content="Șterge" Click="BtnRemove_Click" Tag="{Binding ProductId}"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
@@ -32,6 +32,7 @@
             <TextBlock Text="Total:" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,10,0"/>
             <TextBlock Name="TxtTotal" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,20,0"/>
             <Button Content="Plasează Comanda" Click="BtnPlaceOrder_Click" Padding="10,5"/>
+            <Button Content="Șterge" Click="BtnRemove_Click" Tag="{Binding ProductId}"/>
         </StackPanel>
     </Grid>
 </Window>

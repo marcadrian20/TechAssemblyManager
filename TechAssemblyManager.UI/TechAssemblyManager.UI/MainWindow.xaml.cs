@@ -22,6 +22,7 @@ public partial class MainWindow : Window
     private CartManagerBLL _cartManager;
     private OrderManagerBLL _orderManager;
     private ProductManagerBLL _productManager;
+    private UserManagerBLL _userManagerBLL;
     public MainWindow()
     {
         InitializeComponent();
@@ -33,11 +34,12 @@ public partial class MainWindow : Window
         _cartManager = new CartManagerBLL(_firebaseHelper);
         _orderManager = new OrderManagerBLL(_firebaseHelper);
         _productManager = new ProductManagerBLL(_firebaseHelper);
+        _userManagerBLL = new UserManagerBLL(_firebaseHelper);
     }
 
     private void BtnLogin_Click(object sender, RoutedEventArgs e)
     {
-        new LoginWindow().Show();
+        new LoginWindow(_userManagerBLL).Show();
     }
 
     private void BtnCatalog_Click(object sender, RoutedEventArgs e)

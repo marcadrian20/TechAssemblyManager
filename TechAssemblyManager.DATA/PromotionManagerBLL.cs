@@ -15,12 +15,42 @@ namespace TechAssemblyManager.BLL
         {
             _firebaseHelper = firebaseHelper;
         }
+        public async Task<bool> AddPromotionAsync(Promotion promotion, User manager)
+        {
+            if (manager == null || manager.userType != "manager")
+                return false;
 
-        public async Task<bool> AddPromotionAsync(Promotion promotion, User manager) => throw new NotImplementedException();
-        public async Task<List<Promotion>> GetAllPromotionsAsync() => throw new NotImplementedException();
-        public async Task<bool> DeletePromotionAsync(string promotionId, User manager) => throw new NotImplementedException();
-        public async Task<bool> AddPromotionToCartAsync(string userName, string promotionId) => throw new NotImplementedException();
-        public async Task<List<Promotion>> GetActivePromotionsAsync() => throw new NotImplementedException();
+            promotion.createdBy = manager.userName;
+            promotion.isActive = true;
 
+            return await _firebaseHelper.AddPromotionAsync(promotion);
+        }
+        public async Task<List<Promotion>> GetAllPromotionsAsync()
+        {
+            return await _firebaseHelper.GetAllPromotionsAsync();
+        }
+        public async Task<bool> DeletePromotionAsync(string promotionId, User manager)
+        {
+            if (manager.userType != "manager" || string.IsNullOrWhiteSpace(promotionId))
+                return false;
+
+            await _firebaseHelper.DeleteAsync($"Promotions/{promotionId}");
+            return true;
+        }
+        public async Task<bool> AddPromotionToCartAsync(string userName, string promotionId)
+        {
+            var promotions = await _firebaseHelper.GetAllPromotionsAsync();
+            var promo = promotions.FirstOrDefault(p => p.promotionId == promotionId && p.isActive);
+            if (promo == null) return false;
+
+            // Use method from CartManagerBLL if needed
+            var cartMgr = new CartManagerBLL(_firebaseHelper);
+            return await cartMgr.AddPromotionToCartAsync(userName, promotionId);
+        }
+        public async Task<List<Promotion>> GetActivePromotionsAsync()
+        {
+            var promotions = await _firebaseHelper.GetAllPromotionsAsync();
+            return promotions.Where(p => p.isActive).ToList();
+        }
     }
 }

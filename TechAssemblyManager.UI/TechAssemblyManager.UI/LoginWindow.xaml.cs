@@ -12,6 +12,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using TechAssemblyManager.BLL;
 using TechAssemblyManager.DAL;
 using TechAssemblyManager.DAL.FirebaseHelper;
 using TechAssemblyManager.Models;
@@ -24,15 +25,13 @@ namespace TechAssemblyManager.UI
     /// </summary>
     public partial class LoginWindow : Window
     {
-        private FirebaseHelper _firebaseHelper;     
-        public LoginWindow()
+        //private FirebaseHelper _firebaseHelper;
+        private UserManagerBLL _userManagerBLL;
+        public LoginWindow(UserManagerBLL userManagerBLL)
         {
             InitializeComponent();
-            _firebaseHelper = new FirebaseHelper(
-               "https://techassemblymanager-default-rtdb.firebaseio.com/",
-               "ky7wJX7Iu46hjBHWqDJNWjJW19NeYQurX4Z9VeUv",
-               "AIzaSyBxq3J01JqE6yonLc9plkzA6c3-Gi1r1eU"
-           );
+           
+            _userManagerBLL = userManagerBLL;
         }
 
         public async void BtnLogin_Click(object sender, RoutedEventArgs e)
@@ -47,7 +46,7 @@ namespace TechAssemblyManager.UI
                 return;
             }
 
-            User user = await _firebaseHelper.LoginAsync(username, password);
+            var user = await _userManagerBLL.LoginAsync(username, password);
             if (user != null)
             {
                 SessionManager.LoggedInUser = user;
