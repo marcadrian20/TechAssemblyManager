@@ -85,7 +85,6 @@ namespace TechAssemblyManager.UI
                 LoadCart();
             }
         }
-
         private async void BtnPlaceOrder_Click(object sender, RoutedEventArgs e)
         {
             var user = SessionManager.LoggedInUser;
@@ -139,6 +138,64 @@ namespace TechAssemblyManager.UI
             {
                 MessageBox.Show("Eroare la plasarea comenzii.", "Eroare");
             }
+        }
+
+        private async void BtnAddToCart_Click(object sender, RoutedEventArgs e)
+        {
+           var user = SessionManager.LoggedInUser;
+            if (user == null)
+            {
+                MessageBox.Show("Trebuie să fii autentificat.");
+                return;
+            }
+
+            string productId = "PRODUS_EXEMPLU"; // înlocuiește cu ID real
+            int quantity = 1;
+
+            var cart = await _cartManager.GetUserCartAsync(user.userName);
+            if (cart.ContainsKey(productId))
+            {
+                // Dacă produsul e deja în coș, actualizează cantitatea
+                int newQuantity = cart[productId].quantity + quantity;
+                await _cartManager.AddProductToCartAsync(user.userName, productId, newQuantity);
+            }
+            else
+            {
+                // Dacă nu există, adaugă cu cantitatea specificată
+                await _cartManager.AddProductToCartAsync(user.userName, productId, quantity);
+            }
+
+            MessageBox.Show("Produs adăugat/actualizat în coș.");
+            LoadCart();
+        }
+
+        private async void BtnRemoveSelected_Click(object sender, RoutedEventArgs e)
+        {
+            var user = SessionManager.LoggedInUser;
+            if (user == null)
+            {
+                MessageBox.Show("Trebuie să fii autentificat.");
+                return;
+            }
+
+            dynamic selectedItem = CartGrid.SelectedItem;
+            if (selectedItem == null)
+            {
+                MessageBox.Show("Selectează un produs din coș.");
+                return;
+            }
+
+            string productId = selectedItem.ProductId;
+            var cart = await _cartManager.GetUserCartAsync(user.userName);
+            if (!cart.ContainsKey(productId))
+            {
+                MessageBox.Show("Produsul nu există în coș.");
+                return;
+            }
+
+            await _cartManager.RemoveProductFromCartAsync(user.userName, productId);
+            MessageBox.Show("Produs eliminat din coș.");
+            LoadCart();
         }
     }
 }

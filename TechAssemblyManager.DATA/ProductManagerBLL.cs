@@ -93,6 +93,11 @@ namespace TechAssemblyManager.BLL
                     // return;
             }
         }
+        public async Task<List<ProductCategory>> GetProductCategoriesAsync()
+        {
+            var categoryDict = await _firebaseHelper.GetAsync<Dictionary<string, ProductCategory>>("ProductCategories");
+            return categoryDict?.Values.ToList() ?? new List<ProductCategory>();
+        }
 
         public async Task<bool> UpdateProductAsync(Product product, User currentUser)
         {
