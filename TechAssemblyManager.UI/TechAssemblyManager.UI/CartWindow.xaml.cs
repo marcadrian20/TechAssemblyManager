@@ -128,11 +128,11 @@ namespace TechAssemblyManager.UI
                 OrderType = "Cumpărare"
             };
 
-            var result = await _orderManager.PlaceOrderAsync(order, user);
-            if (result)
+            var orderId = await _orderManager.PlaceOrderAsync(order, user);
+            if (!string.IsNullOrEmpty(orderId))
             {
                 await _cartManager.ClearCartAsync(user.userName);
-                MessageBox.Show("Comanda a fost plasată cu succes!", "Succes");
+                MessageBox.Show($"Comanda a fost plasată cu succes! ID: {orderId}", "Succes");
                 LoadCart();
             }
             else

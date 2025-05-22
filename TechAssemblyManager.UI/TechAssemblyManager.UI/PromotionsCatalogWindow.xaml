@@ -1,0 +1,17 @@
+<Window x:Class="TechAssemblyManager.UI.PromotionsCatalogWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Promoții" Height="400" Width="600">
+    <Grid Margin="10">
+        <DataGrid Name="PromotionsGrid" AutoGenerateColumns="False" IsReadOnly="True">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Nume" Binding="{Binding name}" Width="*"/>
+                <DataGridTextColumn Header="Descriere" Binding="{Binding description}" Width="2*"/>
+                <DataGridTextColumn Header="Reducere (%)" Binding="{Binding discountPercentage}" Width="*"/>
+                <DataGridTextColumn Header="Valabil de la" Binding="{Binding startDate}" Width="*"/>
+                <DataGridTextColumn Header="Până la" Binding="{Binding endDate}" Width="*"/>
+            </DataGrid.Columns>
+        </DataGrid>
+        <!-- Optionally, add a button to add selected promotion to cart -->
+    </Grid>
+</Window>

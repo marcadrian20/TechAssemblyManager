@@ -15,18 +15,20 @@ namespace TechAssemblyManager.BLL
         {
             _firebaseHelper = firebaseHelper;
         }
-        public async Task<bool> PlaceOrderAsync(Order order, User client)
+        public async Task<string> PlaceOrderAsync(Order order, User client)
         {
             if (order == null || client == null || client.userType != "customer")
-                return false;
+                return null;
 
             order.OrderDate = DateTime.Now;
             order.ClientUserName = client.userName;
             order.OrderStatus = "Placed";
 
-            await _firebaseHelper.AddOrderAsync(order);
+            var orderId = await _firebaseHelper.AddOrderAsync(order);
+            order.OrderId = orderId;
+
             await ClearCartAsync(client.userName);
-            return true;
+            return orderId;
         }
         private async Task ClearCartAsync(string userName)
         {
@@ -63,8 +65,16 @@ namespace TechAssemblyManager.BLL
         }
         public async Task<List<Order>> GetAllOrdersAsync()
         {
-            var orders = await _firebaseHelper.GetAsync<Dictionary<string, Order>>("Orders");
-            return orders?.Values.ToList() ?? new();
+            var ordersDict = await _firebaseHelper.GetAsync<Dictionary<string, Order>>("Orders");
+            if (ordersDict == null)
+                return new List<Order>();
+
+            foreach (var kvp in ordersDict)
+            {
+                if (kvp.Value != null)
+                    kvp.Value.OrderId = kvp.Key;
+            }
+            return ordersDict.Values.ToList();
         }
         public async Task<bool> DeleteOrderAsync(string orderId)
         {
@@ -72,6 +82,18 @@ namespace TechAssemblyManager.BLL
                 return false;
 
             await _firebaseHelper.DeleteAsync($"Orders/{orderId}");
+            return true;
+        }
+        public async Task<bool> UpdateOrderDetailsAsync(Order order, string newStatus, User employee)
+        {
+            if (order == null || employee == null || employee.userType != "employee")
+                return false;
+
+            order.OrderStatus = newStatus;
+            if (newStatus == "Completed")
+                order.CompletionDate = DateTime.Now;
+
+            await _firebaseHelper.SetAsync($"Orders/{order.OrderId}", order);
             return true;
         }
         public async Task<List<ServiceRequest>> GetServiceRequestsByClientAsync(string clientUserName)

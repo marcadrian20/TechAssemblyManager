@@ -134,7 +134,11 @@ namespace FirebaseWrapper
             await SetAsync($"ProductCategories/{category.categoryId}", category);
             return true;
         }
-
+        public async Task<List<ProductCategory>> GetCategoriesByTypeAsync(string type)
+        {
+            var categories = await GetAsync<Dictionary<string, ProductCategory>>("ProductCategories");
+            return categories?.Values.Where(c => c.type == type).ToList() ?? new List<ProductCategory>();
+        }
         // Add Product
         public async Task<bool> AddProductAsync(Product product)
         {
@@ -197,9 +201,10 @@ namespace FirebaseWrapper
         }
 
         // Order Management
-        public async Task AddOrderAsync(Order order)
+        public async Task<string> AddOrderAsync(Order order)
         {
-            await PushAsync("Orders", order);
+            var response = await _client.PushAsync("Orders", order); 
+            return response.Result.name;
         }
         public async Task<List<Order>> GetOrdersByClientAsync(string clientUserName)
         {

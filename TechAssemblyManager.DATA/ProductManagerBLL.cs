@@ -123,6 +123,11 @@ namespace TechAssemblyManager.BLL
                 return null;
             return await _firebaseHelper.GetAsync<Product>($"Products/{productId}");
         }
+
+        public async Task<List<ProductCategory>> GetCategoriesByTypeAsync(string type)
+        {
+            return await _firebaseHelper.GetCategoriesByTypeAsync(type);
+        }
         // public async Task<bool> AddProductToCart(string productId, int quantity)
         // {
         //    var selectedProduct = new SelectedProduct

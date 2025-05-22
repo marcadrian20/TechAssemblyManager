@@ -30,7 +30,7 @@ namespace TechAssemblyManager.UI
         public LoginWindow(UserManagerBLL userManagerBLL)
         {
             InitializeComponent();
-           
+
             _userManagerBLL = userManagerBLL;
         }
 
@@ -52,8 +52,21 @@ namespace TechAssemblyManager.UI
                 SessionManager.LoggedInUser = user;
                 MessageBox.Show($"Bun venit, {user.firstName}!", "Succes");
 
-                var main = new MainWindow();
-                main.Show();
+                var mainWindow = Application.Current.Windows
+                                            .OfType<MainWindow>()
+                                            .FirstOrDefault();
+
+                if (mainWindow != null)
+                {
+                    mainWindow.UpdateDashboard();
+                    mainWindow.Activate();
+                }
+                else
+                {
+                    mainWindow = new MainWindow();
+                    mainWindow.Show();
+                }
+
                 this.Close();
             }
             else

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TechAssemblyManager.UI"
         mc:Ignorable="d"
-         Title="TechAssemblyManager" Height="500" Width="800">
+        Title="TechAssemblyManager" Height="500" Width="800">
     <Grid Margin="20">
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Width="300">
 
@@ -16,12 +16,18 @@
                        Margin="0 0 0 20"/>
 
             <Button Content="Logare" Name="BtnLogin" Click="BtnLogin_Click" Margin="0,5"/>
+            <Button Content="Înregistrare" Name="BtnRegister" Click="BtnRegister_Click" Margin="0,5"/>
             <Button Content="Vizualizare Catalog Produse" Name="BtnCatalog" Click="BtnCatalog_Click" Margin="0,5"/>
             <Button Content="Promoții" Name="BtnPromotions" Click="BtnPromotions_Click" Margin="0,5"/>
             <Button Content="Contul Meu" Name="BtnMyAccount" Click="BtnMyAccount_Click" Margin="0,5"/>
             <Button Content="Cerere Service" Name="BtnServiceRequest" Click="BtnServiceRequest_Click" Margin="0,5"/>
-            <Button Content="Istoric Service" Name="BtnServiceHistory" Click="BtnServiceHistory_Click" Margin="0,5"/>
+            <Button Content="Istoric Comenzi" Name="BtnServiceHistory" Click="BtnServiceHistory_Click" Margin="0,5"/>
             <Button Content="Coș" Name="BtnCart" Click="BtnCart_Click" Margin="0,5"/>
+
+            <!-- Manager/Employee Buttons (initially hidden, shown by UpdateDashboard) -->
+            <Button Content="Gestionare Angajați" Name="BtnEmployeeManagement" Click="BtnEmployeeManagement_Click" Margin="0,5" Visibility="Collapsed"/>
+            <Button Content="Gestionare Produse/Componente" Name="BtnProductManagement" Click="BtnProductManagement_Click" Margin="0,5" Visibility="Collapsed"/>
+            <Button Content="Gestionare Comenzi/Service" Name="BtnOrderManagement" Click="BtnOrderManagement_Click" Margin="0,5" Visibility="Collapsed"/>
 
         </StackPanel>
     </Grid>

@@ -6,7 +6,7 @@ namespace TechAssemblyManager.Models
     public class Order
     {
         public string OrderId { get; set; } // Firebase key
-        public DateTime OrderDate { get; set; } = DateTime.Now;
+        public DateTime? OrderDate { get; set; } = DateTime.Now;
         public decimal TotalCost { get; set; }
         public string OrderType { get; set; }
         public string OrderStatus { get; set; }

@@ -1,0 +1,45 @@
+<Window x:Class="TechAssemblyManager.UI.AddEmployeeDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Adaugă Angajat" Height="340" Width="350" WindowStartupLocation="CenterOwner" ResizeMode="NoResize">
+    <Grid Margin="15">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="100"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <TextBlock Text="Username:" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center"/>
+        <TextBox Name="TxtUserName" Grid.Row="0" Grid.Column="1" Margin="0,5"/>
+
+        <TextBlock Text="Email:" Grid.Row="1" Grid.Column="0" VerticalAlignment="Center"/>
+        <TextBox Name="TxtEmail" Grid.Row="1" Grid.Column="1" Margin="0,5"/>
+
+        <TextBlock Text="Prenume:" Grid.Row="2" Grid.Column="0" VerticalAlignment="Center"/>
+        <TextBox Name="TxtFirstName" Grid.Row="2" Grid.Column="1" Margin="0,5"/>
+
+        <TextBlock Text="Nume:" Grid.Row="3" Grid.Column="0" VerticalAlignment="Center"/>
+        <TextBox Name="TxtLastName" Grid.Row="3" Grid.Column="1" Margin="0,5"/>
+
+        <TextBlock Text="Parolă:" Grid.Row="4" Grid.Column="0" VerticalAlignment="Center"/>
+        <PasswordBox Name="TxtPassword" Grid.Row="4" Grid.Column="1" Margin="0,5"/>
+
+        <CheckBox Name="ChkIsSenior" Content="Este Senior" Grid.Row="5" Grid.Column="1" Margin="0,5"/>
+
+        <TextBlock Name="LblError" Foreground="Red" Grid.Row="6" Grid.ColumnSpan="2" Visibility="Collapsed" Margin="0,5"/>
+
+        <StackPanel Grid.Row="7" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+            <Button Content="OK" Width="70" Margin="0,0,10,0" Click="BtnOk_Click"/>
+            <Button Content="Anulează" Width="70" Click="BtnCancel_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>
