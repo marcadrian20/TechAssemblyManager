@@ -66,7 +66,9 @@ namespace TechAssemblyManager.UI
             orders = await orderManagerBLL.GetAllOrdersAsync();
             foreach (var order in orders)
             {
-                lstComenzi.Items.Add($"ID: {order.OrderId} | Client: {order.ClientUserName} | Status: {order.OrderStatus} | Data: {order.OrderDate.ToShortDateString()} | Total: {order.TotalCost} RON");
+                string dateText = order.OrderDate?.ToShortDateString() ?? "N/A";
+
+                lstComenzi.Items.Add($"ID: {order.OrderId} | Client: {order.ClientUserName} | Status: {order.OrderStatus} | Data: {order.OrderDate} | Total: {order.TotalCost} RON");
             }
 
         }

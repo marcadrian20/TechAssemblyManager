@@ -79,7 +79,9 @@ namespace TechAssemblyManager.UI
 
             foreach (var order in orders)
             {
-                lstOrders.Items.Add($"ID: {order.OrderId} | Data: {order.OrderDate.ToShortDateString()} | Status: {order.OrderStatus} | Total: {order.TotalCost} RON");
+                string dateText = order.OrderDate?.ToShortDateString() ?? "N/A";
+                lstOrders.Items.Add($"ID: {order.OrderId} | Data: {dateText} | Status: {order.OrderStatus} | Total: {order.TotalCost} RON");
+
             }
         }
 

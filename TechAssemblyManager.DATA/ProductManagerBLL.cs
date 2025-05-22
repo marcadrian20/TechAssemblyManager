@@ -125,7 +125,7 @@ namespace TechAssemblyManager.BLL
         }
         // public async Task<bool> AddProductToCart(string productId, int quantity)
         // {
-        //     var selectedProduct = new SelectedProduct
+        //    var selectedProduct = new SelectedProduct
         //     {
         //         quantity = quantity
         //     };

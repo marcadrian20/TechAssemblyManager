@@ -162,6 +162,20 @@ namespace TechAssemblyManager.UI
                 FlowDirection = FlowDirection.LeftToRight
             };
             this.Controls.Add(flpPaginare);
+            lstCos = new ListBox
+            {
+                Location = new Point(20, 50),
+                Size = new Size(250, 300)
+            };
+            this.Controls.Add(lstCos);
+
+            lblCos = new Label
+            {
+                Text = "Coș cumpărături:",
+                Location = new Point(20, 20),
+                AutoSize = true
+            };
+            this.Controls.Add(lblCos);
 
             lblPagina = new Label
             {
@@ -290,6 +304,7 @@ namespace TechAssemblyManager.UI
                     this.Hide();
                     return;
                 }
+                lstCos.Items.Clear();
                 lstCos.Items.Add($"{produs.name} - {produs.price} RON");
 
                 await cartManagerBLL.AddProductToCartAsync(SessionManager.LoggedInUser.userName, produs.productId, 1);

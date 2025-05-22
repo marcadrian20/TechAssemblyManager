@@ -85,7 +85,7 @@ namespace TechAssemblyManager.UI
         private void BtnSignUp_Click(object sender, EventArgs e)
         {
             this.Hide();
-            new SignUpForm(mainForm).Show();
+            new SignUpForm(mainForm,userManagerBLL).Show();
         }
     }
 }

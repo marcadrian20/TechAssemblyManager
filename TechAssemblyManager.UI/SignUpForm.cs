@@ -26,35 +26,49 @@ namespace TechAssemblyManager.UI
         private Label lblPhone;
         private MainForm mainForm;
         private UserManagerBLL userManagerBLL;
-        public SignUpForm(MainForm mainForm)
+        public SignUpForm(MainForm mainForm, UserManagerBLL userManagerBLL)
         {
             this.mainForm = mainForm;
             this.Text = "Creare cont";
             this.Size = new Size(300, 280);
             this.StartPosition = FormStartPosition.CenterScreen;
+            this.userManagerBLL = userManagerBLL;
+            int startX = 20;
+            int startY = 20;
+            int spacingY = 50;
 
-            lblNume = new Label() { Text = "Nume:", Location = new Point(20, 20), AutoSize = true };
-            txtNume = new TextBox() { Location = new Point(100, 20), Width = 150 };
+            // Nume
+            lblNume = new Label() { Text = "Nume:", Location = new Point(startX, startY), AutoSize = true };
+            txtNume = new TextBox() { Location = new Point(startX, startY + 20), Width = 200 };
 
-            lblPrenume = new Label() { Text = "Prenume:", Location = new Point(20, 20), AutoSize = true };
-            txtPrenume = new TextBox() { Location = new Point(100, 20), Width = 150 };
+            // Prenume
+            lblPrenume = new Label() { Text = "Prenume:", Location = new Point(startX, startY + spacingY), AutoSize = true };
+            txtPrenume = new TextBox() { Location = new Point(startX, startY + spacingY + 20), Width = 200 };
 
-            lblEmail = new Label() { Text = "Email:", Location = new Point(20, 60), AutoSize = true };
-            txtEmail = new TextBox() { Location = new Point(100, 60), Width = 150 };
+            // Email
+            lblEmail = new Label() { Text = "Email:", Location = new Point(startX, startY + spacingY * 2), AutoSize = true };
+            txtEmail = new TextBox() { Location = new Point(startX, startY + spacingY * 2 + 20), Width = 200 };
 
-            lblUsername = new Label() { Text = "Username:", Location = new Point(20, 60), AutoSize = true };
-            txtUsername = new TextBox() { Location = new Point(100, 60), Width = 150 };
+            // Username
+            lblUsername = new Label() { Text = "Username:", Location = new Point(startX, startY + spacingY * 3), AutoSize = true };
+            txtUsername = new TextBox() { Location = new Point(startX, startY + spacingY * 3 + 20), Width = 200 };
 
-            lblParola = new Label() { Text = "Parolă:", Location = new Point(20, 100), AutoSize = true };
-            txtParola = new TextBox() { Location = new Point(100, 100), Width = 150 };
+            // Parolă
+            lblParola = new Label() { Text = "Parolă:", Location = new Point(startX, startY + spacingY * 4), AutoSize = true };
+            txtParola = new TextBox() { Location = new Point(startX, startY + spacingY * 4 + 20), Width = 200 };
 
-            lblAdresa = new Label() { Text = "Adresa:", Location = new Point(20, 100), AutoSize = true };
-            txtAdresa = new TextBox() { Location = new Point(100, 100), Width = 150 };
+            // Adresa
+            lblAdresa = new Label() { Text = "Adresa:", Location = new Point(startX, startY + spacingY * 5), AutoSize = true };
+            txtAdresa = new TextBox() { Location = new Point(startX, startY + spacingY * 5 + 20), Width = 200 };
 
-            lblPhone = new Label() { Text = "Numar de telefon:", Location = new Point(20, 100), AutoSize = true };
-            txtPhone = new TextBox() { Location = new Point(100, 100), Width = 150 };
+            // Telefon
+            lblPhone = new Label() { Text = "Număr de telefon:", Location = new Point(startX, startY + spacingY * 6), AutoSize = true };
+            txtPhone = new TextBox() { Location = new Point(startX, startY + spacingY * 6 + 20), Width = 200 };
 
-            btnCreeazaCont = new Button() { Text = "Crează cont", Location = new Point(100, 150), Width = 100 };
+            // Buton
+            btnCreeazaCont = new Button() { Text = "Crează cont", Location = new Point(startX + 40, startY + spacingY * 8), Width = 120 };
+
+
             btnCreeazaCont.Click += BtnCreeazaCont_ClickAsync;
             this.FormClosing += SignUpForm_FormClosing;
             this.Controls.Add(lblNume);
@@ -63,6 +77,14 @@ namespace TechAssemblyManager.UI
             this.Controls.Add(txtEmail);
             this.Controls.Add(lblParola);
             this.Controls.Add(txtParola);
+            this.Controls.Add(lblPrenume);
+            this.Controls.Add(txtPrenume);
+            this.Controls.Add(lblUsername);
+            this.Controls.Add(txtUsername);
+            this.Controls.Add(lblAdresa);
+            this.Controls.Add(txtAdresa);
+            this.Controls.Add(lblPhone);
+            this.Controls.Add(txtPhone);
             this.Controls.Add(btnCreeazaCont);
         }
         private void SignUpForm_FormClosing(object sender, EventArgs e)
@@ -109,6 +131,7 @@ namespace TechAssemblyManager.UI
             MessageBox.Show("Logare cu succes!");
             this.Hide();
             // new Logare(mainForm).Show();
+            mainForm.Show();
         }
     }
 }
