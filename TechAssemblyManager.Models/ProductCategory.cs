@@ -8,5 +8,6 @@
         public string description { get; set; }          // optional category description
 
         public ProductCategory() { }
+
     }
 }

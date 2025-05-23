@@ -1,0 +1,32 @@
+﻿<Window x:Class="TechAssemblyManager.UI.ServiceRequestWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TechAssemblyManager.UI"
+        mc:Ignorable="d"
+         Title="Cerere Service" Height="350" Width="500" WindowStartupLocation="CenterScreen">
+    <Grid Margin="20">
+        <StackPanel VerticalAlignment="Center">
+            <TextBlock Text="Trimite o cerere de service"
+                       FontSize="20"
+                       FontWeight="Bold"
+                       Margin="0 0 0 20"
+                       HorizontalAlignment="Center"/>
+
+            <TextBlock Text="Descriere problemă:"/>
+            <TextBox Name="TxtProblem" Height="60" TextWrapping="Wrap" Margin="0,5"/>
+
+            <TextBlock Text="Data dorită pentru service:" Margin="0,10,0,0"/>
+            <DatePicker Name="DatePickerScheduled" Margin="0,5"/>
+
+            <TextBlock Name="LblError" Foreground="Red" Visibility="Collapsed" Margin="0,10"/>
+
+            <Button Content="Trimite cererea"
+                    Click="BtnSubmit_Click"
+                    HorizontalAlignment="Right"
+                    Padding="10,5"
+                    Margin="0,10"/>
+        </StackPanel>
+    </Grid>
+</Window>

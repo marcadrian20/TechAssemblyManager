@@ -1,0 +1,31 @@
+<Window x:Class="TechAssemblyManager.UI.OrderManagementWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Gestionare Comenzi și Service" Height="600" Width="1100" WindowStartupLocation="CenterScreen">
+    <Grid Margin="10">
+        <StackPanel>
+            <TextBlock Text="Gestionare Comenzi și Service" FontSize="20" FontWeight="Bold" Margin="0 0 0 10"/>
+            <ComboBox Name="ManagementTypeComboBox" Width="200" Margin="0,0,0,10" SelectionChanged="ManagementTypeComboBox_SelectionChanged">
+                <ComboBoxItem Content="Comenzi"/>
+                <ComboBoxItem Content="Cereri Service"/>
+            </ComboBox>
+            <DataGrid Name="ManagementGrid" AutoGenerateColumns="False" Height="400" SelectionMode="Single" Margin="0,0,0,10"
+                      SelectionChanged="ManagementGrid_SelectionChanged">
+                <!-- Columns will be set dynamically in code-behind -->
+            </DataGrid>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                <TextBlock Text="Descriere:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                <TextBox Name="DescriptionTextBox" Width="400" Height="25" Margin="0,0,10,0"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                <TextBlock Text="Taxă Service:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                <TextBox Name="ServiceFeeTextBox" Width="100" Height="25" Margin="0,0,10,0"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <ComboBox Name="StatusComboBox" Width="150" Margin="0,0,10,0"/>
+                <Button Content="Schimbă Status" Width="120" Click="BtnChangeStatus_Click"/>
+                <Button Content="Reîncarcă" Width="100" Margin="10,0,0,0" Click="BtnReload_Click"/>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</Window>
