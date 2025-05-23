@@ -203,7 +203,7 @@ namespace FirebaseWrapper
         // Order Management
         public async Task<string> AddOrderAsync(Order order)
         {
-            var response = await _client.PushAsync("Orders", order); 
+            var response = await _client.PushAsync("Orders", order);
             return response.Result.name;
         }
         public async Task<List<Order>> GetOrdersByClientAsync(string clientUserName)
@@ -222,9 +222,13 @@ namespace FirebaseWrapper
         }
 
         // Service Request Management
-        public async Task AddServiceRequestAsync(ServiceRequest request)
+        public async Task<string> AddServiceRequestAsync(ServiceRequest request)
         {
-            await PushAsync("ServiceRequests", request);
+            var response = await _client.PushAsync("ServiceRequests/", request);
+            string key = response.Result.name;
+            request.ServiceRequestId = key;
+            await _client.SetAsync($"ServiceRequests/{key}", request); // Save with ID
+            return key;
         }
         public async Task<List<ServiceRequest>> GetServiceRequestsByClientAsync(string clientUserName)
         {

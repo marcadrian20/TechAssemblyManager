@@ -144,8 +144,25 @@ namespace TechAssemblyManager.UI
                     selected.promotionId = dialog.SelectedPromotionId;
                     var currentUser = SessionManager.LoggedInUser;
                     bool result = await _productManager.UpdateProductAsync(selected, currentUser);
+
+                    // --- Update Promotion's includedProductIds ---
                     if (result)
                     {
+                        // Get the promotion
+                        var promotion = (await _promotionManager.GetAllPromotionsAsync())
+                            .FirstOrDefault(p => p.promotionId == dialog.SelectedPromotionId);
+                        if (promotion != null)
+                        {
+                            // Ensure the includedProductIds list is initialized
+                            if (promotion.includedProductIds == null)
+                                promotion.includedProductIds = new Dictionary<string, bool>();
+
+                            if (!promotion.includedProductIds.ContainsKey(selected.productId))
+                            {
+                                promotion.includedProductIds[selected.productId] = true;
+                                await _promotionManager.UpdatePromotionAsync(promotion, currentUser);
+                            }
+                        }
                         MessageBox.Show("Promoție asignată!");
                         CategoryComboBox_SelectionChanged(null, null);
                     }

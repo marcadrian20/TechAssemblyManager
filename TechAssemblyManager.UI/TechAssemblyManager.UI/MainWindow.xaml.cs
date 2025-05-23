@@ -61,6 +61,7 @@ public partial class MainWindow : Window
         BtnEmployeeManagement.Visibility = Visibility.Collapsed;
         BtnProductManagement.Visibility = Visibility.Collapsed;
         BtnOrderManagement.Visibility = Visibility.Collapsed;
+        BtnDebug.Visibility = Visibility.Collapsed;
 
         // If logged in, show/hide based on role
         if (user != null)
@@ -79,6 +80,7 @@ public partial class MainWindow : Window
                 BtnEmployeeManagement.Visibility = Visibility.Visible;
                 // BtnProductManagement.Visibility = Visibility.Visible;
                 // BtnOrderManagement.Visibility = Visibility.Visible;
+                BtnDebug.Visibility = Visibility.Visible;
             }
             else if (_userManagerBLL.IsSenior(user))
             {
@@ -101,7 +103,7 @@ public partial class MainWindow : Window
     }
     private void BtnCatalog_Click(object sender, RoutedEventArgs e)
     {
-        new CatalogWindow(_productManager,_cartManager,_orderManager).Show();
+        new CatalogWindow(_productManager, _cartManager, _orderManager).Show();
     }
 
     private void BtnPromotions_Click(object sender, RoutedEventArgs e)
@@ -115,7 +117,7 @@ public partial class MainWindow : Window
         else
         {
             // Customer/employee/guest: open catalog window
-            new PromotionsCatalogWindow(_promotionManager).Show();
+            new PromotionsCatalogWindow(_promotionManager, _productManager).Show();
         }
     }
 
@@ -160,5 +162,9 @@ public partial class MainWindow : Window
         // TODO: Replace with your actual OrderManagementWindow
         new OrderManagementWindow(_orderManager).Show();
         // MessageBox.Show("Gestionare Comenzi/Service (manager/angajat).");
+    }
+    private void BtnDebug_Click(object sender, RoutedEventArgs e)
+    {
+        new DebugWindow(_firebaseHelper).Show();
     }
 }

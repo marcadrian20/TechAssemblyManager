@@ -37,6 +37,13 @@ namespace TechAssemblyManager.BLL
             await _firebaseHelper.DeleteAsync($"Promotions/{promotionId}");
             return true;
         }
+        public async Task<bool> UpdatePromotionAsync(Promotion promotion, User user)
+        {
+            if (user == null || promotion == null)
+                return false;
+            await _firebaseHelper.UpdateAsync($"Promotions/{promotion.promotionId}", promotion);
+            return true;
+        }
         public async Task<bool> AddPromotionToCartAsync(string userName, string promotionId)
         {
             var promotions = await _firebaseHelper.GetAllPromotionsAsync();

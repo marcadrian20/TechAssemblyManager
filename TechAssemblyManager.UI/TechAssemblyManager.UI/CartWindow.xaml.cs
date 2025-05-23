@@ -72,6 +72,56 @@ namespace TechAssemblyManager.UI
                 }
             }
 
+            // Show promotion as a negative price line if present
+            // var promoItem = await FirebaseHelper.Instance.GetAsync<PromotionCartItem>($"Users/{user.userName}/PromotionCartItem");
+            var promoItem = await _cartManager.GetPromotionCartItemAsync(user.userName);
+            if (promoItem != null)
+            {
+                displayItems.Add(new
+                {
+                    ProductId = "PROMO",
+                    Name = $"Promoție: {promoItem.Description}",
+                    Quantity = 1,
+                    Price = promoItem.DiscountAmount,
+                    Subtotal = promoItem.DiscountAmount
+                });
+                total += promoItem.DiscountAmount;
+            }
+
+            // DIY assembly fee logic
+            bool onlyComponents = true;
+            if (cart.Count > 0)
+            {
+                foreach (var kvp in cart)
+                {
+                    var product = await _productManager.GetProductByIdAsync(kvp.Key);
+                    if (product != null)
+                    {
+                        var category = await _productManager.GetProductCategoryByIdAsync(product.categoryId);
+                        if (category != null && category.type == "system")
+                        {
+                            onlyComponents = false;
+                            break;
+                        }
+                    }
+                }
+            }
+            decimal assemblyFee = 0;
+            if (onlyComponents && cart.Count > 0)
+                assemblyFee = 100;
+            if (assemblyFee > 0)
+            {
+                displayItems.Add(new
+                {
+                    ProductId = "FEE",
+                    Name = "Taxă asamblare DIY",
+                    Quantity = 1,
+                    Price = assemblyFee,
+                    Subtotal = assemblyFee
+                });
+                total += assemblyFee;
+            }
+
             CartGrid.ItemsSource = displayItems;
             TxtTotal.Text = $"{total} lei";
         }
@@ -139,10 +189,29 @@ namespace TechAssemblyManager.UI
                 MessageBox.Show("Eroare la plasarea comenzii.", "Eroare");
             }
         }
+        private async void BtnRemovePromotion_Click(object sender, RoutedEventArgs e)
+        {
+            var user = SessionManager.LoggedInUser;
+            if (user == null)
+            {
+                MessageBox.Show("Trebuie să fii autentificat.");
+                return;
+            }
 
+            var result = await _cartManager.RemovePromotionFromCartAsync(user.userName);
+            if (result)
+            {
+                MessageBox.Show("Promoția și produsele asociate au fost eliminate din coș (dacă nu erau deja adăugate separat).");
+                LoadCart();
+            }
+            else
+            {
+                MessageBox.Show("Eroare la eliminarea promoției.");
+            }
+        }
         private async void BtnAddToCart_Click(object sender, RoutedEventArgs e)
         {
-           var user = SessionManager.LoggedInUser;
+            var user = SessionManager.LoggedInUser;
             if (user == null)
             {
                 MessageBox.Show("Trebuie să fii autentificat.");

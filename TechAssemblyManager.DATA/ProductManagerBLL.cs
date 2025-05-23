@@ -93,6 +93,14 @@ namespace TechAssemblyManager.BLL
                     // return;
             }
         }
+        public async Task<ProductCategory?> GetProductCategoryByIdAsync(string categoryId)
+        {
+            if (string.IsNullOrWhiteSpace(categoryId))
+                return null;
+
+            var categories = await GetProductCategoriesAsync();
+            return categories.FirstOrDefault(c => c.categoryId == categoryId);
+        }
         public async Task<List<ProductCategory>> GetProductCategoriesAsync()
         {
             var categoryDict = await _firebaseHelper.GetAsync<Dictionary<string, ProductCategory>>("ProductCategories");

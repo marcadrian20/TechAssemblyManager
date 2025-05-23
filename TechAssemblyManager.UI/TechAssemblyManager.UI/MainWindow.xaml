@@ -28,6 +28,7 @@
             <Button Content="Gestionare Angajați" Name="BtnEmployeeManagement" Click="BtnEmployeeManagement_Click" Margin="0,5" Visibility="Collapsed"/>
             <Button Content="Gestionare Produse/Componente" Name="BtnProductManagement" Click="BtnProductManagement_Click" Margin="0,5" Visibility="Collapsed"/>
             <Button Content="Gestionare Comenzi/Service" Name="BtnOrderManagement" Click="BtnOrderManagement_Click" Margin="0,5" Visibility="Collapsed"/>
+            <Button Content="Debug Window" Name="BtnDebug" Click="BtnDebug_Click" Margin="0,5"/>
 
         </StackPanel>
     </Grid>

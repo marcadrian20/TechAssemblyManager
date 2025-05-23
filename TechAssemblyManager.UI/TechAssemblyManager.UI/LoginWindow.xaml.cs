@@ -50,7 +50,7 @@ namespace TechAssemblyManager.UI
             if (user != null)
             {
                 SessionManager.LoggedInUser = user;
-                MessageBox.Show($"Bun venit, {user.firstName}!", "Succes");
+                MessageBox.Show($"Bun venit, {user.userName}!", "Succes");
 
                 var mainWindow = Application.Current.Windows
                                             .OfType<MainWindow>()

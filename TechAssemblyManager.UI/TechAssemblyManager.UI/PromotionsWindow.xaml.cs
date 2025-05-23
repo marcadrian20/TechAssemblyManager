@@ -29,7 +29,7 @@ namespace TechAssemblyManager.UI
             PromotionsGrid.ItemsSource = list;
         }
 
-        private void BtnAdd_Click(object sender, RoutedEventArgs e)
+        private async void BtnAdd_Click(object sender, RoutedEventArgs e)
         {
             var dialog = new AddEditPromotionDialog();
             if (dialog.ShowDialog() == true)
@@ -37,7 +37,7 @@ namespace TechAssemblyManager.UI
                 var promo = dialog.Promotion;
                 // promo.promotionId = Guid.NewGuid().ToString().Substring(0, 8);
                 var user = SessionManager.LoggedInUser;
-                _ = AddPromotionAsync(promo, user);
+                await AddPromotionAsync(promo, user);
             }
         }
 

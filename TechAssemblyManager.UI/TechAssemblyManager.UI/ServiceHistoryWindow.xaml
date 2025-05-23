@@ -15,11 +15,14 @@
 
         <DataGrid Name="ServiceGrid" AutoGenerateColumns="False" IsReadOnly="True" Margin="0,40,0,0">
             <DataGrid.Columns>
+                <DataGridTextColumn Header="ID Cerere" Binding="{Binding ServiceRequestId}" Width="100"/>
                 <DataGridTextColumn Header="Problemă" Binding="{Binding ProblemDescription}" Width="*"/>
                 <DataGridTextColumn Header="Data cererii" Binding="{Binding RequestDate}" Width="120"/>
                 <DataGridTextColumn Header="Data programată" Binding="{Binding ScheduledDate}" Width="120"/>
                 <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="100"/>
                 <DataGridTextColumn Header="Diagnoză" Binding="{Binding DiagnosisNotes}" Width="150"/>
+                <DataGridTextColumn Header="Taxă service" Binding="{Binding ServiceFee}" Width="100"/>
+                <DataGridTextColumn Header="Angajat" Binding="{Binding EmployeeUserName}" Width="100"/>
             </DataGrid.Columns>
         </DataGrid>
     </Grid>

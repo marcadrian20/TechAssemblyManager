@@ -36,26 +36,55 @@ namespace TechAssemblyManager.BLL
 
             return await _firebaseHelper.GetUserCartAsync(userName);
         }
+        public async Task<bool> RemovePromotionFromCartAsync(string userName)
+        {
+            // Remove the promotion cart item
+            await _firebaseHelper.DeleteAsync($"Users/{userName}/PromotionCartItem");
+
+            // Remove the products associated with the promotion
+            var promotions = await _firebaseHelper.GetAllPromotionsAsync();
+            var promoItem = await GetPromotionCartItemAsync(userName);
+            if (promoItem != null)
+            {
+                var promotion = promotions.FirstOrDefault(p => p.promotionId == promoItem.PromotionId);
+                if (promotion != null && promotion.includedProductIds != null)
+                {
+                    foreach (var prodId in promotion.includedProductIds.Keys)
+                    {
+                        await _firebaseHelper.RemoveProductFromCartAsync(userName, prodId);
+                    }
+                }
+            }
+            return true;
+        }
+
         public async Task<bool> AddPromotionToCartAsync(string userName, string promotionId)
         {
             var promotions = await _firebaseHelper.GetAllPromotionsAsync();
             var promotion = promotions.FirstOrDefault(p => p.promotionId == promotionId && p.isActive);
-            if (promotion == null) return false;
+            if (promotion == null || promotion.includedProductIds == null) return false;
 
-            var userCart = await _firebaseHelper.GetUserCartAsync(userName);
-            decimal totalPrice = 0;
-            foreach (var item in userCart)
+            // Add all products in the promotion to the cart
+            foreach (var prodId in promotion.includedProductIds.Keys)
             {
-                var product = await _firebaseHelper.GetAsync<Product>($"Products/{item.Key}");
-                if (product != null)
+                var cart = await _firebaseHelper.GetUserCartAsync(userName);
+                if (!cart.ContainsKey(prodId))
                 {
-                    totalPrice += (decimal)product.price * item.Value.quantity;
+                    await _firebaseHelper.AddProductToCartAsync(userName, prodId, 1);
                 }
             }
 
+            // Calculate total price of included products
+            decimal totalPrice = 0;
+            foreach (var prodId in promotion.includedProductIds.Keys)
+            {
+                var product = await _firebaseHelper.GetAsync<Product>($"Products/{prodId}");
+                if (product != null)
+                    totalPrice += (decimal)product.price;
+            }
             var discountAmount = -(totalPrice * ((decimal)promotion.discountPercentage / 100));
 
-            // Add the promotion to the cart
+            // Add the promotion as a negative price item
             await _firebaseHelper.SetAsync($"Users/{userName}/PromotionCartItem", new PromotionCartItem
             {
                 PromotionId = promotionId,
@@ -64,6 +93,12 @@ namespace TechAssemblyManager.BLL
             });
 
             return true;
+        }
+        public async Task<PromotionCartItem?> GetPromotionCartItemAsync(string userName)
+        {
+            if (string.IsNullOrWhiteSpace(userName))
+                return null;
+            return await _firebaseHelper.GetAsync<PromotionCartItem>($"Users/{userName}/PromotionCartItem");
         }
         public async Task<bool> ClearCartAsync(string userName)
         {

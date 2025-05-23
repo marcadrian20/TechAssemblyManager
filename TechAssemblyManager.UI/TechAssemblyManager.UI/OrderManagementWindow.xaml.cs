@@ -72,7 +72,9 @@ namespace TechAssemblyManager.UI
             }
             else if (_currentMode == "Cereri Service" && ManagementGrid.SelectedItem is ServiceRequest selectedRequest)
             {
-                DescriptionTextBox.Text = selectedRequest.ProblemDescription;
+                DescriptionTextBox.Text = selectedRequest.DiagnosisNotes;
+                ServiceFeeTextBox.Text = selectedRequest.ServiceFee.ToString("0.##");
+
             }
         }
 
@@ -101,9 +103,16 @@ namespace TechAssemblyManager.UI
             }
             else if (_currentMode == "Cereri Service" && ManagementGrid.SelectedItem is ServiceRequest selectedRequest && StatusComboBox.SelectedItem is string newStatusSR)
             {
-                selectedRequest.ProblemDescription = DescriptionTextBox.Text;
-                bool result = await _orderManager.UpdateServiceRequestStatusAsync(selectedRequest.ServiceRequestId, newStatusSR, user);
-                if (result)
+                selectedRequest.DiagnosisNotes = DescriptionTextBox.Text;
+                if (decimal.TryParse(ServiceFeeTextBox.Text, out var fee))
+                    selectedRequest.ServiceFee = fee;
+                bool result = await _orderManager.UpdateServiceRequestStatusAsync(
+                       selectedRequest.ServiceRequestId,
+                       newStatusSR,
+                       user,
+                       selectedRequest.DiagnosisNotes,
+                       selectedRequest.ServiceFee
+                   ); if (result)
                 {
                     MessageBox.Show("Cererea de service a fost actualizată.");
                     await LoadData();

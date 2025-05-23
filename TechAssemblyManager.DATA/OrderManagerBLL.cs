@@ -48,7 +48,8 @@ namespace TechAssemblyManager.BLL
             request.Status = "Requested";
             request.CustomerUserName = client.userName;
 
-            await _firebaseHelper.AddServiceRequestAsync(request);
+            var serviceRequestId = await _firebaseHelper.AddServiceRequestAsync(request);
+            request.ServiceRequestId = serviceRequestId; // Set the ID on the object
             return true;
         }
         public async Task<List<Order>> GetOrdersByClientAsync(string clientUserName)
@@ -100,12 +101,15 @@ namespace TechAssemblyManager.BLL
         {
             return await _firebaseHelper.GetServiceRequestsByClientAsync(clientUserName);
         }
-        public async Task<bool> UpdateServiceRequestStatusAsync(string requestId, string status, User employee)
+        public async Task<bool> UpdateServiceRequestStatusAsync(string requestId, string status, User employee, string diagnosisNotes, decimal serviceFee)
         {
-            if (employee.userType != "employee")
-                return false;
-
-            await _firebaseHelper.UpdateServiceRequestStatusAsync(requestId, status);
+            var request = await _firebaseHelper.GetAsync<ServiceRequest>($"ServiceRequests/{requestId}");
+            if (request == null) return false;
+            request.Status = status;
+            request.DiagnosisNotes = diagnosisNotes;
+            request.ServiceFee = serviceFee;
+            request.EmployeeUserName = employee.userName;
+            await _firebaseHelper.SetAsync($"ServiceRequests/{requestId}", request);
             return true;
         }
         public async Task<List<ServiceRequest>> GetAllServiceRequestsAsync()
