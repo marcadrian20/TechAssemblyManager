@@ -1,11 +1,15 @@
 ﻿using System;
+using System.Windows.Shapes;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using TechAssemblyManager.BLL;
 using TechAssemblyManager.DAL.FirebaseHelper;
 using TechAssemblyManager.Models;
+using System.Globalization;
+using System.Windows.Controls.Primitives;
 
 namespace TechAssemblyManager.UI
 {
@@ -21,7 +25,7 @@ namespace TechAssemblyManager.UI
         private string _selectedCategoryId = null;
         private string _selectedFilter = null;
 
-        public CatalogWindow(ProductManagerBLL productManager, CartManagerBLL cartManager,OrderManagerBLL orderManager)
+        public CatalogWindow(ProductManagerBLL productManager, CartManagerBLL cartManager, OrderManagerBLL orderManager)
         {
             InitializeComponent();
             _productManager = productManager;
@@ -131,7 +135,29 @@ namespace TechAssemblyManager.UI
                 MessageBox.Show("Produs adăugat în coș!");
             }
         }
+        private void StarPanel_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (sender is StackPanel starPanel)
+            {
+                if (starPanel.DataContext is CatalogProductViewModel product)
+                {
+                    var stars = starPanel.Children.OfType<Path>().ToList();
+                    double rating = product.Rating;
 
+                    for (int i = 0; i < stars.Count; i++)
+                    {
+                        double starValue = rating - i;
+
+                        if (starValue >= 1)
+                            stars[i].Fill = Brushes.Gold;
+                        else if (starValue >= 0.5)
+                            stars[i].Fill = new LinearGradientBrush(Colors.Gold, Colors.Gray, 0);
+                        else
+                            stars[i].Fill = Brushes.Gray;
+                    }
+                }
+            }
+        }
         private void BtnSeeCart_Click(object sender, RoutedEventArgs e)
         {
             var user = SessionManager.LoggedInUser;
@@ -140,7 +166,21 @@ namespace TechAssemblyManager.UI
                 MessageBox.Show("Trebuie să fii logat ca client pentru a vedea coșul.");
                 return;
             }
-            new CartWindow(_cartManager, _productManager,_orderManager).ShowDialog();
+            new CartWindow(_cartManager, _productManager, _orderManager).ShowDialog();
         }
+        private void BtnSeeDetails_Click(object sender, RoutedEventArgs e)
+        {
+            if (ProductGrid.SelectedItem is CatalogProductViewModel selectedProduct)
+            {
+                var detailsWindow = new ProductDetailsWindow(selectedProduct);
+                detailsWindow.ShowDialog();
+            }
+            else
+            {
+                MessageBox.Show("Selectează un produs pentru a vedea detaliile.");
+            }
+        }
+
     }
+
 }
