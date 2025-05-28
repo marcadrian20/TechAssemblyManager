@@ -38,23 +38,27 @@ namespace TechAssemblyManager.BLL
         }
         public async Task<bool> RemovePromotionFromCartAsync(string userName)
         {
-            // Remove the promotion cart item
-            await _firebaseHelper.DeleteAsync($"Users/{userName}/PromotionCartItem");
-
-            // Remove the products associated with the promotion
-            var promotions = await _firebaseHelper.GetAllPromotionsAsync();
+            // Get the promotion cart item BEFORE deleting it
             var promoItem = await GetPromotionCartItemAsync(userName);
             if (promoItem != null)
             {
+                // Get the promotion details to find included products
+                var promotions = await _firebaseHelper.GetAllPromotionsAsync();
                 var promotion = promotions.FirstOrDefault(p => p.promotionId == promoItem.PromotionId);
+
                 if (promotion != null && promotion.includedProductIds != null)
                 {
+                    // Remove the products associated with the promotion
                     foreach (var prodId in promotion.includedProductIds.Keys)
                     {
                         await _firebaseHelper.RemoveProductFromCartAsync(userName, prodId);
                     }
                 }
             }
+
+            // Remove the promotion cart item AFTER removing the products
+            await _firebaseHelper.DeleteAsync($"Users/{userName}/PromotionCartItem");
+
             return true;
         }
 

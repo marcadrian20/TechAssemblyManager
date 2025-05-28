@@ -23,19 +23,43 @@ namespace TechAssemblyManager.BLL
         }
         public async Task<bool> AddProductAsync(Product product, User currentUser)
         {
-            if (string.IsNullOrWhiteSpace(product.productId) ||  ///Validation whether there's a valid category
+            if (product == null ||  ///Validation whether there's a valid category
                 currentUser == null ||                          //Or whether there is ab existing user 
                 currentUser.userType != "employee"
                 || !currentUser.employeeData.isSenior              //being an employee
                 )
             { return false; }
-            //#TODO @Omixii add validation for Seniors
-            //#TODO @Omixii validation for the description to be <=100 words??
-            //#TODO @Omixii verifica si tu coaie daca are nume produsu(ca doar nu bagi null)
-            //#TODO @Omixii verify price >0 , rating <=5
-            // Check if category exists
-            //ALTFEL TE DAU LA JAMAL
+            // Basic field validation
+            if (string.IsNullOrWhiteSpace(product.productId) ||
+                string.IsNullOrWhiteSpace(product.name) ||
+                string.IsNullOrWhiteSpace(product.description))
+            {
+                return false;
+            }
 
+            // Price validation
+            if (product.price <= 0)
+                return false;
+
+            // Rating validation (0-5 range)
+            if (product.rating < 0 || product.rating > 5)
+                return false;
+
+            // Description word count validation (<=100 words)
+            var wordCount = product.description.Split(new char[] { ' ', '\t', '\n', '\r' },
+                StringSplitOptions.RemoveEmptyEntries).Length;
+            if (wordCount > 100)
+                return false;
+
+            // Check if category exists
+            var category = await GetProductCategoryByIdAsync(product.categoryId);
+            if (category == null)
+                return false;
+
+            // Check if product ID already exists
+            var existingProduct = await GetProductByIdAsync(product.productId);
+            if (existingProduct != null)
+                return false;
 
             //DAL call
             return await _firebaseHelper.AddProductAsync(product);
@@ -54,17 +78,36 @@ namespace TechAssemblyManager.BLL
             || currentUser.userType != "employee"
                 || !currentUser.employeeData.isSenior)
             { return false; }
-            ////#TODO/////////////
-            //senior check
-            ////////////////////////
-            //Validation for the:
-            //category
-            //name
-            //type
-            //description
-            /////////////////////
-            if (string.IsNullOrWhiteSpace(productCategory.categoryId))
-            { return false; }
+
+            // Category validation
+            if (productCategory == null)
+                return false;
+
+            // Basic field validation
+            if (string.IsNullOrWhiteSpace(productCategory.categoryId) ||
+                string.IsNullOrWhiteSpace(productCategory.name) ||
+                string.IsNullOrWhiteSpace(productCategory.type))
+            {
+                return false;
+            }
+
+            // Type validation (should be "system" or "component")
+            if (productCategory.type != "system" && productCategory.type != "component")
+                return false;
+
+            // Description validation (optional field, but if provided should be reasonable length)
+            if (!string.IsNullOrWhiteSpace(productCategory.description))
+            {
+                var wordCount = productCategory.description.Split(new char[] { ' ', '\t', '\n', '\r' },
+                    StringSplitOptions.RemoveEmptyEntries).Length;
+                if (wordCount > 100)
+                    return false;
+            }
+
+            // Check if category ID already exists
+            var existingCategory = await GetProductCategoryByIdAsync(productCategory.categoryId);
+            if (existingCategory != null)
+                return false;
 
             return await _firebaseHelper.AddProductCategoryAsync(productCategory);
         }
@@ -88,9 +131,6 @@ namespace TechAssemblyManager.BLL
                     return products.OrderByDescending(p => p.name).ToList();
                 default:
                     return products;
-                    // default:
-                    // MessageBox.Show("Unknown sort option selected.");
-                    // return;
             }
         }
         public async Task<ProductCategory?> GetProductCategoryByIdAsync(string categoryId)
@@ -114,7 +154,36 @@ namespace TechAssemblyManager.BLL
             if (product == null || string.IsNullOrWhiteSpace(product.productId))
                 return false;
 
-            // Optionally: validate fields (price > 0, rating <= 5, etc.)
+            // Basic field validation
+            if (string.IsNullOrWhiteSpace(product.name) ||
+                string.IsNullOrWhiteSpace(product.description))
+                return false;
+
+            // Price validation
+            if (product.price <= 0)
+                return false;
+
+            // Rating validation (0-5 range)
+            if (product.rating < 0 || product.rating > 5)
+                return false;
+
+            // Description word count validation (<=100 words)
+            var wordCount = product.description.Split(new char[] { ' ', '\t', '\n', '\r' },
+                StringSplitOptions.RemoveEmptyEntries).Length;
+            if (wordCount > 100)
+                return false;
+            // Check if category exists (if categoryId is being updated)
+            if (!string.IsNullOrWhiteSpace(product.categoryId))
+            {
+                var category = await GetProductCategoryByIdAsync(product.categoryId);
+                if (category == null)
+                    return false;
+            }
+
+            // Check if product exists before updating
+            var existingProduct = await GetProductByIdAsync(product.productId);
+            if (existingProduct == null)
+                return false;
             await _firebaseHelper.UpdateAsync($"Products/{product.productId}", product);
             return true;
         }
@@ -141,27 +210,5 @@ namespace TechAssemblyManager.BLL
         {
             return await _firebaseHelper.GetCategoriesByTypeAsync(type);
         }
-        // public async Task<bool> AddProductToCart(string productId, int quantity)
-        // {
-        //    var selectedProduct = new SelectedProduct
-        //     {
-        //         quantity = quantity
-        //     };
-
-        //     var result = await _firebaseHelper.AddProductToCart(productId, selectedProduct);
-        //     return result;
-        // }
-
-        // public async Task<bool> RemoveProductFromCart(string productId)
-        // {
-        //     var result = await _firebaseHelper.RemoveProductFromCart(productId);
-        //     return result;
-        // }
-
-        // public async Task<List<SelectedProducts>> GetProductsInCart()
-        // {
-        //     var products = await _firebaseHelper.GetProductsInCart();
-        //     return products;
-        // }
     }
 }

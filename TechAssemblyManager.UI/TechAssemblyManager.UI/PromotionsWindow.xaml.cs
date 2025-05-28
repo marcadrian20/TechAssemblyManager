@@ -40,7 +40,23 @@ namespace TechAssemblyManager.UI
                 await AddPromotionAsync(promo, user);
             }
         }
-
+        private async void BtnEdit_Click(object sender, RoutedEventArgs e)
+        {
+            if (PromotionsGrid.SelectedItem is Promotion selected)
+            {
+                var dialog = new AddEditPromotionDialog(selected);
+                if (dialog.ShowDialog() == true)
+                {
+                    var updatedPromo = dialog.Promotion;
+                    var user = SessionManager.LoggedInUser;
+                    await UpdatePromotionAsync(updatedPromo, user);
+                }
+            }
+            else
+            {
+                MessageBox.Show("Selectează o promoție pentru a o edita.");
+            }
+        }
         private async System.Threading.Tasks.Task AddPromotionAsync(Promotion promo, User user)
         {
             bool success = await _promotionManager.AddPromotionAsync(promo, user);
@@ -54,7 +70,19 @@ namespace TechAssemblyManager.UI
                 MessageBox.Show("Eroare la adăugare promoție.");
             }
         }
-
+        private async System.Threading.Tasks.Task UpdatePromotionAsync(Promotion promo, User user)
+        {
+            bool success = await _promotionManager.UpdatePromotionAsync(promo, user);
+            if (success)
+            {
+                MessageBox.Show("Promoția a fost actualizată.");
+                LoadPromotions();
+            }
+            else
+            {
+                MessageBox.Show("Eroare la actualizare promoție.");
+            }
+        }
         private async void BtnDelete_Click(object sender, RoutedEventArgs e)
         {
             if (PromotionsGrid.SelectedItem is Promotion selected)

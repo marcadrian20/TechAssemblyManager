@@ -41,6 +41,32 @@ namespace TechAssemblyManager.BLL
         {
             if (user == null || promotion == null)
                 return false;
+            // Promotion validation
+            if (promotion == null || string.IsNullOrWhiteSpace(promotion.promotionId))
+                return false;
+
+            // Basic field validation
+            if (string.IsNullOrWhiteSpace(promotion.name) ||
+                promotion.discountPercentage <= 0 ||
+                promotion.discountPercentage > 100)
+                return false;
+
+            // Date validation
+            if (DateTime.TryParse(promotion.startDate, out var start) &&
+                DateTime.TryParse(promotion.endDate, out var end))
+            {
+                if (start >= end)
+                    return false;
+            }
+            else
+            {
+                return false; // Invalid date format
+            }
+
+            // Check if promotion exists
+            var existingPromotion = await _firebaseHelper.GetAsync<Promotion>($"Promotions/{promotion.promotionId}");
+            if (existingPromotion == null)
+                return false;
             await _firebaseHelper.UpdateAsync($"Promotions/{promotion.promotionId}", promotion);
             return true;
         }
