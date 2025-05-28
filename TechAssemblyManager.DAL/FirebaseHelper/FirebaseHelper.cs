@@ -9,7 +9,7 @@ using TechAssemblyManager.Models;
 
 namespace FirebaseWrapper
 {
-    public class FirebaseHelper
+    public class FirebaseHelper : IFirebaseHelper
     {
         private readonly IFirebaseClient _client;
         public readonly bool _status;

@@ -11,9 +11,9 @@ namespace TechAssemblyManager.BLL
 {
     public class UserManagerBLL
     {
-        private readonly FirebaseHelper _firebaseHelper;
+        private readonly IFirebaseHelper _firebaseHelper;
 
-        public UserManagerBLL(FirebaseHelper firebaseHelper)
+        public UserManagerBLL(IFirebaseHelper firebaseHelper)
         {
             _firebaseHelper = firebaseHelper;
         }

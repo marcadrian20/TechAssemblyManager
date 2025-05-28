@@ -10,8 +10,8 @@ namespace TechAssemblyManager.BLL
 {
     public class CartManagerBLL
     {
-        private FirebaseHelper _firebaseHelper;
-        public CartManagerBLL(FirebaseHelper firebaseHelper) { _firebaseHelper = firebaseHelper; }
+        private IFirebaseHelper _firebaseHelper;
+        public CartManagerBLL(IFirebaseHelper firebaseHelper) { _firebaseHelper = firebaseHelper; }
 
         public async Task<bool> AddProductToCartAsync(string userName, string productId, int quantity)
         {

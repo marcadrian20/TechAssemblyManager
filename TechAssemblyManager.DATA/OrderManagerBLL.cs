@@ -10,8 +10,8 @@ namespace TechAssemblyManager.BLL
 {
     public class OrderManagerBLL
     {
-        private FirebaseHelper _firebaseHelper;
-        public OrderManagerBLL(FirebaseHelper firebaseHelper)
+        private IFirebaseHelper _firebaseHelper;
+        public OrderManagerBLL(IFirebaseHelper firebaseHelper)
         {
             _firebaseHelper = firebaseHelper;
         }

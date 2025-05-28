@@ -9,9 +9,9 @@ namespace TechAssemblyManager.BLL
 {
     public class PromotionManagerBLL
     {
-        private FirebaseHelper _firebaseHelper;
+        private IFirebaseHelper _firebaseHelper;
 
-        public PromotionManagerBLL(FirebaseHelper firebaseHelper)
+        public PromotionManagerBLL(IFirebaseHelper firebaseHelper)
         {
             _firebaseHelper = firebaseHelper;
         }
