@@ -10,7 +10,7 @@ using FirebaseWrapper;
 namespace TechAssemblyManager.Tests
 {
     [TestClass]
-    public class ProductManagerBLLTest
+    public class TestLitoiuMarcAdrian
     {
         private Mock<IFirebaseHelper>? _mockFirebaseHelper;
         private ProductManagerBLL? _productManager;
