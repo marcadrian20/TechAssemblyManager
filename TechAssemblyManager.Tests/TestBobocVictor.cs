@@ -10,7 +10,7 @@ using System.Linq;
 namespace TechAssemblyManager.Tests
 {
     [TestClass]
-    public class TestLitoiuMarcAdrian_
+    public class TestBobocVictor
     {
         private Mock<IFirebaseHelper>? _mockFirebaseHelper;
         private CartManagerBLL? _cartManager;
