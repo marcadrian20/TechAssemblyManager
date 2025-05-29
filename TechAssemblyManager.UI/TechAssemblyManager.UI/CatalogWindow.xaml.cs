@@ -46,8 +46,8 @@ namespace TechAssemblyManager.UI
             FilterComboBox.ItemsSource = new List<string>
             {
                 "Niciun filtru",
-                "Category [A -> Z]",
-                "Category [Z -> A]",
+                // "Category [A -> Z]",
+                // "Category [Z -> A]",
                 "Price [Low -> High]",
                 "Price [High -> Low]",
                 "Name [A -> Z]",
