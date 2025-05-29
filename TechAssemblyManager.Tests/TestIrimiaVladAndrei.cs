@@ -260,7 +260,7 @@ namespace TechAssemblyManager.Tests
                 email = "emp@company.com",
                 firstName = "Jane",
                 lastName = "Smith",
-                passwordHash = "plainpassword", // This is treated as plain password in AddEmployeeAsync
+                passwordHash = "plainpassword", 
                 employeeData = new EmployeeData { isSenior = false }
             };
 
